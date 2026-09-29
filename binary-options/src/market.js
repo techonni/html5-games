@@ -7,6 +7,7 @@ export const MARKETS = [
   { id: 'R_25', name: 'Volatility 25 (1s) Index', badge: '25', vol: 0.25, start: 3521.842, decimals: 3 },
   { id: 'R_50', name: 'Volatility 50 (1s) Index', badge: '50', vol: 0.5, start: 243.1873, decimals: 4 },
   { id: 'R_75', name: 'Volatility 75 (1s) Index', badge: '75', vol: 0.75, start: 12045.61, decimals: 2 },
+  { id: 'R_90', name: 'Volatility 90 (1s) Index', badge: '90', vol: 0.9, start: 21860.247, decimals: 3 },
   { id: 'R_100', name: 'Volatility 100 (1s) Index', badge: '100', vol: 1, start: 985.58, decimals: 2 },
 ];
 

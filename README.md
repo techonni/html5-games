@@ -55,3 +55,4 @@ Simulador mobile de negociação demo em PixiJS, publicado em `/binary-options/`
   - **Turbo**: 30 s a 5 min, lucro fixo de 80%.
 - **Multipliers** (Up/Down, x1–x300, take profit/stop loss, stop out).
 - Separadores Trade / Positions (abertas e fechadas), modo de ecrã inteiro e saldo demo de 10 000 EUR.
+- Layout desktop (≥ 900px): barra lateral, separadores de mercados com P/L, painel de parâmetros (stop out, stop out level, comissão), gaveta de posições com botão Close, ferramentas do gráfico (tipo/intervalo, linhas horizontais, média móvel, exportar PNG), zoom e arrastar, relógio GMT e tema escuro.
