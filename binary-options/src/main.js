@@ -63,7 +63,7 @@ const state = {
   strike: 0,
   chartMode: deskMQ.matches ? 60 : 'tick',
   tabs: ['R_100'],
-  theme: 'light',
+  theme: 'dark',
   drawer: null, // 'positions' | 'reports' | 'home' | 'help'
   open: [],
   closed: [],
@@ -650,7 +650,7 @@ let chart = null;
 render();
 (async () => {
   try {
-    await document.fonts?.load("600 15px 'IBM Plex Sans'");
+    await document.fonts?.load("600 15px 'Figtree'");
   } catch {
     /* fonte indisponível: usa a alternativa */
   }
@@ -901,12 +901,6 @@ $$('.rail-btn').forEach(
   (b) =>
     (b.onclick = () => {
       const r = b.dataset.rail;
-      if (r === 'theme') {
-        state.theme = state.theme === 'light' ? 'dark' : 'light';
-        document.body.classList.toggle('dark', state.theme === 'dark');
-        chart?.setTheme(state.theme);
-        return;
-      }
       if (r === 'language') {
         return openSheet('Language', (body) => {
           const c = chips([['en', 'English']], 'en', () => {}, 2);
