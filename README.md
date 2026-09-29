@@ -97,3 +97,13 @@ Crash mobile-first feito **só com PixiJS v8 + GSAP + TypeScript**, publicado em
 - Ronda solo: 5 s de contagem, `m(t) = e^(0.00006·t)`, crash com RTP 99% via `crypto.getRandomValues()`, retirada manual ou automática no alvo; créditos demo guardados no browser.
 - **Som com Howler.js** (`crash-pixi/src/audio/`): cliques, aposta, tique dos últimos 3 s, arranque, motor em loop cujo tom sobe com o multiplicador, retirada e crash. Os sons são sintetizados em código (WAV gerado no browser, sem ficheiros áudio). Botão de som no cabeçalho, com a escolha guardada no browser; fica em silêncio quando o separador está escondido.
 - `npm run typecheck` verifica o TypeScript (`tsconfig.json`); `npm run build` corre o typecheck antes do Vite.
+
+## zunrel Binary (`zunrel-binary-option/`)
+
+Recriação do simulador de opções binárias feita **só com PixiJS v8 + GSAP + TypeScript + Howler.js**, publicada em `/zunrel-binary-option/`:
+
+- Toda a UI no canvas: cabeçalho da conta demo (10 000 EUR, Repor), seletor de mercado e de tipo de contrato, gráfico, painel Sobe/Desce com Duração / Aposta / Pagamento, botão Comprar e barra inferior Início / Negociar / Posições / Menu.
+- Gráfico Pixi: linha de ticks com área em gradiente que desliza em tempo real, etiqueta de preço, eixo de horas, velas de 1 e 5 min, linhas de entrada e de vencimento com contagem, e modo expandido.
+- Índices sintéticos Volatility 10–100 (1s) gerados no browser; **Binary** (1–15 min, +85%) e **Turbo** (30 s–5 min, +80%) decididos pela cotação no segundo exato do vencimento (empate devolve a aposta).
+- Posições abertas (ao vivo, a ganhar/perder) e fechadas, lista de mercados com minigráficos, menu com som e reposição do saldo.
+- GSAP para as transições (folhas inferiores, seletores, cotação, separadores) e Howler.js para os sons sintetizados (clique, compra, ganho, perda, empate, bip dos últimos 3 s). Setas ↑/↓ e Enter no teclado.
