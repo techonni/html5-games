@@ -18,6 +18,25 @@ export const icons = {
   contract:
     '<svg width="34" height="34" viewBox="0 0 34 34" fill="none" stroke="#999" stroke-width="1.3" stroke-linecap="round"><rect x="3.5" y="3.5" width="27" height="27" rx="3"/><path d="M12 10v14M17 14v10M22 10v8M10 13h4M15 19h4M20 14h4"/></svg>',
   close: '<svg width="20" height="20" viewBox="0 0 20 20" stroke="#333" stroke-width="1.8" stroke-linecap="round"><path d="M4 4l12 12M16 4 4 16"/></svg>',
+  reports: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>',
+  help: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.8"/><path d="m6 6 3.3 3.3M18 6l-3.3 3.3M6 18l3.3-3.3M18 18l-3.3-3.3"/></svg>',
+  language: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.3 3.6 5.2 3.6 8.5s-1.1 6.2-3.6 8.5c-2.5-2.3-3.6-5.2-3.6-8.5S9.5 5.8 12 3.5z"/></svg>',
+  theme: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M19 15.5A8 8 0 0 1 8.5 5 8 8 0 1 0 19 15.5z"/></svg>',
+  logout: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5H5v14h5M14 8l4 4-4 4M18 12H9"/></svg>',
+  homeDesk: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M3.5 11 12 4l8.5 7M6 9v11h12V9"/></svg>',
+  positionsDesk: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5h4"/></svg>',
+  positionsDeskOn: '<svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="currentColor"/><path d="M12 7v5h4" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>',
+  area: '<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M3 3v16h16"/><path d="M3 15l4-5 4 3 4-5 4 4v7H3z"/></svg>',
+  pencil: '<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M4 18l1-4L15.5 3.5l3 3L8 17z"/><path d="M13.5 5.5l3 3M4 18l4-1"/></svg>',
+  indicator: '<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="11" cy="6" r="3"/><path d="M11 9v4M4 19l7-6 7 6M6 13h10"/></svg>',
+  download: '<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3v11M6.5 9.5 11 14l4.5-4.5M3 15v4h16v-4"/></svg>',
+  minus: '<svg width="18" height="18" viewBox="0 0 18 18" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 9h12"/></svg>',
+  plusSm: '<svg width="18" height="18" viewBox="0 0 18 18" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 9h12M9 3v12"/></svg>',
+  target: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="9" cy="9" r="5.5"/><circle cx="9" cy="9" r="2"/><path d="M9 1v2.5M9 14.5V17M1 9h2.5M14.5 9H17"/></svg>',
+  chevRight: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3 5 5-5 5"/></svg>',
+  fullscreen: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7V2h5M13 2h5v5M18 13v5h-5M7 18H2v-5"/></svg>',
+  tabClose: '<svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="#999"/><path d="M6 6l6 6M12 6l-6 6" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  closeX: '<svg width="20" height="20" viewBox="0 0 20 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4l12 12M16 4 4 16"/></svg>',
 };
 
 // Ícone do índice sintético: etiqueta com o número, bolha "1s" e velas.

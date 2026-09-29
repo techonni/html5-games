@@ -6,6 +6,7 @@ import { icons, symbolIcon } from './icons.js';
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const phone = $('#phone');
+const deskMQ = window.matchMedia('(min-width: 900px)');
 
 // ---------- Estado ----------
 const START_BALANCE = 10000;
@@ -60,7 +61,10 @@ const state = {
   sl: null,
   durations: { binary: 60, digital: 60, turbo: 30 },
   strike: 0,
-  chartMode: 'tick',
+  chartMode: deskMQ.matches ? 60 : 'tick',
+  tabs: ['R_100'],
+  theme: 'light',
+  drawer: null, // 'positions' | 'reports' | 'home' | 'help'
   open: [],
   closed: [],
   posTab: 'open',
@@ -288,14 +292,30 @@ function symbolSheet() {
       const b = el('button', `list-item${d.id === state.market ? ' on' : ''}`);
       b.innerHTML = `<span class="sym-ico">${symbolIcon(d.badge)}</span><span>${d.name}</span><span class="price">${feed.markets[d.id].last.quote.toFixed(d.decimals)}</span>`;
       b.onclick = () => {
-        state.market = d.id;
-        chart?.setMarket(market());
+        selectMarket(d.id, true);
         close();
-        render();
       };
       body.append(b);
     }
   });
+}
+
+function selectMarket(id, addTab) {
+  if (!state.tabs.includes(id)) {
+    if (addTab || !deskMQ.matches) state.tabs.push(id);
+    if (state.tabs.length > 4) state.tabs.splice(state.tabs.findIndex((t) => t !== id), 1);
+  }
+  state.market = id;
+  chart?.setMarket(market());
+  render();
+}
+
+function closeTab(id) {
+  if (state.tabs.length < 2) return;
+  const i = state.tabs.indexOf(id);
+  state.tabs.splice(i, 1);
+  if (state.market === id) selectMarket(state.tabs[Math.max(0, i - 1)]);
+  else render();
 }
 
 function multiplierSheet() {
@@ -403,6 +423,9 @@ function chartSheet() {
         close();
       }, 3),
     );
+    const clear = el('button', 'sheet-btn ghost', 'Clear drawings');
+    clear.onclick = () => (chart?.clearDrawings(), close());
+    body.append(clear);
   });
 }
 
@@ -490,6 +513,7 @@ function render() {
   badge.textContent = state.open.length;
   $$('#pos-tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === state.posTab));
   renderPositions();
+  renderDesk();
   renderLive();
 }
 
@@ -569,6 +593,8 @@ function renderLive() {
   totalEl.textContent = signedEur(shown);
   totalEl.classList.toggle('pos', shown >= 0);
 
+  renderDeskLive();
+
   if (state.view === 'positions' && state.posTab === 'open') {
     for (const c of state.open) {
       const card = $(`.pos-card[data-id="${c.id}"]`);
@@ -628,7 +654,291 @@ render();
   } catch {
     /* fonte indisponível: usa a alternativa */
   }
-  chart = await Chart.create($('#chart'), market());
+  chart = await Chart.create($('#chart-canvas'), market());
   chart.setMode(state.chartMode);
+  chart.onDrawDone = () => $('#t-draw').classList.remove('on');
+  placeChart();
   renderLive();
 })();
+
+// =================== Desktop ===================
+const deskIconMap = { home: 'homeDesk', positions: 'positionsDesk' };
+$$('#desk [data-icon]').forEach((i) => (i.innerHTML = icons[deskIconMap[i.dataset.icon] ?? i.dataset.icon] ?? ''));
+$('#d-plus').innerHTML = icons.plus;
+$('#drawer-close').innerHTML = icons.closeX;
+
+// Move o canvas do gráfico para o layout ativo.
+function placeChart() {
+  if (!chart) return;
+  const host = $('#chart-canvas');
+  if (deskMQ.matches) {
+    $('#d-chart').prepend(host);
+    chart.setLayout('desktop');
+  } else {
+    $('#chart').prepend(host);
+    chart.setLayout('mobile');
+  }
+}
+deskMQ.addEventListener('change', () => {
+  placeChart();
+  render();
+});
+
+function setDeskCard(n, label, value, onClick) {
+  const c = $(`#d-card-${n}`);
+  c.hidden = label == null;
+  if (label == null) return;
+  $('.d-card-label', c).textContent = label;
+  $('.d-card-value', c).textContent = value;
+  c.onclick = onClick;
+}
+
+function deskRows() {
+  const rows = [];
+  if (state.tradeType === 'multipliers') {
+    const m = market();
+    const q = m.last.quote;
+    const comm = r2(state.stake * Math.sqrt(state.mult) * 0.01);
+    const move = (state.stake - comm) / (state.stake * state.mult);
+    const level = state.dir === 'up' ? q * (1 - move) : q * (1 + move);
+    rows.push(['Stop out', euroSym(state.stake)], ['Stop out level', Math.max(0, level).toFixed(m.decimals)], ['Commission', euroSym(comm)]);
+  } else {
+    const rate = profitRate(state.tradeType, state.dir, state.strike);
+    const exp = new Date((market().last.epoch + state.durations[state.tradeType]) * 1000);
+    rows.push(
+      ['Payout', euroSym(r2(state.stake * (1 + rate)))],
+      ['Profit', `+${Math.round(rate * 100)}%`],
+      ['Expiry', `${exp.toISOString().slice(11, 19)} GMT`],
+    );
+  }
+  return rows;
+}
+
+function renderDesk() {
+  // Separadores de mercado
+  const tabs = $('#d-tabs');
+  tabs.replaceChildren(
+    ...state.tabs.map((id) => {
+      const d = def(id);
+      const on = id === state.market;
+      const t = el('div', `d-tab${on ? ' on' : ''}`);
+      t.dataset.id = id;
+      t.innerHTML = `<span class="sym-ico">${symbolIcon(d.badge)}</span>
+        <span class="d-tab-text"><span class="d-tab-name">${d.name}</span>
+        <span class="d-tab-sub"><span>${TRADE_TYPES[state.tradeType]}</span>${on ? `<i class="chev">${icons.chevron}</i>` : ''}<span class="d-tab-pl" hidden></span></span></span>
+        ${on && state.tabs.length > 1 ? `<button class="d-tab-x" aria-label="Close tab">${icons.tabClose}</button>` : ''}`;
+      t.onclick = (e) => {
+        if (e.target.closest('.d-tab-x')) return closeTab(id);
+        if (on) return symbolSheet();
+        selectMarket(id);
+      };
+      return t;
+    }),
+  );
+
+  // Painel de parâmetros
+  $('#d-howto-text').textContent = `How to trade ${TRADE_TYPES[state.tradeType]}?`;
+  $$('#d-seg button').forEach((b) => b.classList.toggle('on', b.dataset.dir === state.dir));
+  const buy = $('#d-buy');
+  buy.classList.toggle('down', state.dir === 'down');
+  if (state.tradeType === 'multipliers') {
+    const risk = [state.tp != null ? `TP ${euroShort(state.tp)}` : null, state.sl != null ? `SL ${euroShort(state.sl)}` : null].filter(Boolean).join(' · ');
+    setDeskCard(1, 'Multiplier', `x${state.mult}`, multiplierSheet);
+    setDeskCard(2, 'Stake', euroShort(state.stake), stakeSheet);
+    setDeskCard(3, 'Risk management', risk || '-', riskSheet);
+    buy.textContent = 'Buy';
+  } else {
+    setDeskCard(1, 'Duration', fmtDur(state.durations[state.tradeType]), durationSheet);
+    setDeskCard(2, 'Stake', euroShort(state.stake), stakeSheet);
+    if (state.tradeType === 'digital') {
+      const m = market();
+      const off = state.strike * strikeStep(m, state.durations.digital);
+      setDeskCard(3, 'Strike', state.strike ? `${off > 0 ? '+' : ''}${off.toFixed(m.decimals)}` : 'Spot', strikeSheet);
+    } else setDeskCard(3, null);
+    buy.textContent = `Buy · +${Math.round(profitRate(state.tradeType, state.dir, state.strike) * 100)}%`;
+  }
+
+  // Barra lateral
+  const badge = $('#rail-badge');
+  badge.hidden = state.open.length === 0;
+  badge.textContent = state.open.length;
+  $$('.rail-btn').forEach((b) => {
+    const on = b.dataset.rail === state.drawer;
+    b.classList.toggle('on', on);
+    if (b.dataset.rail === 'positions') $('i', b).innerHTML = on ? icons.positionsDeskOn : icons.positionsDesk;
+  });
+  $('#d-interval').textContent = state.chartMode === 'tick' ? '1t' : state.chartMode === 60 ? '1m' : '5m';
+  $('#t-ind').classList.toggle('on', !!chart?.sma);
+  renderDrawer();
+}
+
+function deskPositionCard(c, live) {
+  const d = def(c.market);
+  const pl = live ? contractPL(c) : c.pl;
+  const card = el('div', 'd-pos');
+  card.dataset.id = c.id;
+  const info = live
+    ? isBinary(c.type)
+      ? binaryInfo(c)
+      : `x${c.mult} · Entry ${c.entry.toFixed(d.decimals)}`
+    : isBinary(c.type)
+      ? `Strike ${c.strike.toFixed(d.decimals)} · Exit ${c.exit.toFixed(d.decimals)}`
+      : `${c.reason ? `${c.reason[0].toUpperCase()}${c.reason.slice(1)} · ` : ''}Entry ${c.entry.toFixed(d.decimals)}`;
+  card.innerHTML = `<span class="sym-ico">${symbolIcon(d.badge)}</span><span class="t1">${d.name}</span><span class="ci">${icons.tradeOutline}</span>
+    <span class="t2">${contractName(c)}</span><span class="stake">${num(c.stake)} EUR</span>
+    <span class="pl${pl >= 0 ? ' pos' : ''}" data-pl>${signedEur(pl)}</span>
+    <span class="t3">${info}</span>`;
+  if (live && c.type === 'multipliers') {
+    const btn = el('button', 'd-close', 'Close');
+    btn.onclick = () => closeContract(c, null);
+    card.append(btn);
+  }
+  return card;
+}
+
+const HELP = {
+  multipliers: `<h3>Multipliers</h3><p>Choose Up if you think the price will rise or Down if it will fall. Your profit or loss is the market movement multiplied by the multiplier and your stake.</p><p>Your loss never exceeds your stake: when it reaches the stake the position is stopped out at the <b>stop out level</b>. A small commission is charged when you open the position.</p><p>Use risk management to close automatically with a take profit or stop loss.</p>`,
+  binary: `<h3>Binary options</h3><p><b>Up / Call</b>: you win if the price at expiry is higher than the entry price. <b>Down / Put</b>: you win if it is lower.</p><p>All or nothing: if you are right at the exact second of expiry you receive your stake plus a fixed profit of 85%. If you are wrong you lose 100% of the stake. If the price is exactly the entry price, your stake is returned.</p>`,
+  digital: `<h3>Digital options</h3><p>Like binary options, but you choose a strike price. The payout depends on the distance to the strike: the further the strike is against you, the higher the payout.</p><p>Up wins if the price at expiry is above the strike; Down wins if it is below.</p>`,
+  turbo: `<h3>Turbo options</h3><p>Very short binary options, from 30 seconds to 5 minutes, with a fixed profit of 80%. The result is decided by the price at the exact second of expiry.</p>`,
+};
+
+function renderDrawer() {
+  const dr = $('#drawer');
+  dr.hidden = !state.drawer;
+  if (!state.drawer) return;
+  const body = $('#drawer-body');
+  const tabsEl = $('#drawer-tabs');
+  const foot = $('#drawer-foot');
+  tabsEl.hidden = state.drawer !== 'positions';
+  foot.hidden = !['positions', 'reports'].includes(state.drawer);
+  const titles = { positions: 'Positions', reports: 'Reports', home: 'Trade types', help: 'Help' };
+  $('#drawer-title').textContent = titles[state.drawer];
+  $$('#drawer-tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === state.posTab));
+
+  if (state.drawer === 'positions' || state.drawer === 'reports') {
+    const open = state.drawer === 'positions' && state.posTab === 'open';
+    const items = open ? state.open : state.closed;
+    body.replaceChildren(...items.map((c) => deskPositionCard(c, open)));
+    if (!items.length) body.append(el('div', 'empty', open ? 'You have no open positions.' : 'You have no closed positions yet.'));
+  } else if (state.drawer === 'home') {
+    body.replaceChildren(
+      ...$$('.home-view .home-card').map((src) => {
+        const b = src.cloneNode(true);
+        b.onclick = () => {
+          state.tradeType = b.dataset.type;
+          state.drawer = null;
+          render();
+        };
+        return b;
+      }),
+    );
+  } else {
+    body.replaceChildren(el('div', 'drawer-text', `${HELP[state.tradeType]}<h3>Demo account</h3><p>Prices are simulated in your browser. The balance has no monetary value.</p>`));
+  }
+}
+
+function renderDeskLive() {
+  // P/L por separador
+  for (const t of $$('#d-tabs .d-tab')) {
+    const mine = state.open.filter((c) => c.market === t.dataset.id);
+    const plEl = $('.d-tab-pl', t);
+    plEl.hidden = mine.length === 0;
+    if (mine.length) {
+      const pl = r2(mine.reduce((s, c) => s + contractPL(c), 0));
+      plEl.textContent = euroSym(pl);
+      plEl.classList.toggle('pos', pl >= 0);
+    }
+  }
+  // Linhas de detalhe (dependem do preço atual)
+  $('#d-rows').replaceChildren(...deskRows().map(([a, b]) => el('div', 'd-row', `<span>${a}</span><span>${b}</span>`)));
+  // Relógio GMT
+  const now = new Date();
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  $('#d-date').textContent = `${now.getUTCDate()} ${MONTHS[now.getUTCMonth()]} ${now.getUTCFullYear()}`;
+  $('#d-time').textContent = `${now.toISOString().slice(11, 19)} GMT`;
+  // Gaveta de posições
+  if (state.drawer === 'positions' || state.drawer === 'reports') {
+    const open = state.drawer === 'positions' && state.posTab === 'open';
+    const total = open ? r2(state.open.reduce((s, c) => s + contractPL(c), 0)) : r2(state.closed.reduce((s, c) => s + c.pl, 0));
+    const n = open ? state.open.length : state.closed.length;
+    $('#drawer-count').textContent = `${n} ${open ? 'open' : 'closed'} position${n === 1 ? '' : 's'}`;
+    const tot = $('#drawer-total');
+    tot.textContent = signedEur(total);
+    tot.classList.toggle('pos', total >= 0);
+    if (open) {
+      for (const c of state.open) {
+        const card = $(`.d-pos[data-id="${c.id}"]`);
+        if (!card) continue;
+        const pl = contractPL(c);
+        const p = $('[data-pl]', card);
+        p.textContent = signedEur(pl);
+        p.classList.toggle('pos', pl >= 0);
+        if (isBinary(c.type)) $('.t3', card).textContent = binaryInfo(c);
+      }
+    }
+  }
+}
+
+// Eventos desktop
+$$('#d-seg button').forEach((b) => (b.onclick = () => ((state.dir = b.dataset.dir), render())));
+$('#d-buy').onclick = buy;
+$('#d-plus').onclick = () => {
+  openSheet('Add market', (body, close) => {
+    for (const d of MARKETS) {
+      const b = el('button', `list-item${state.tabs.includes(d.id) ? ' on' : ''}`);
+      b.innerHTML = `<span class="sym-ico">${symbolIcon(d.badge)}</span><span>${d.name}</span><span class="price">${feed.markets[d.id].last.quote.toFixed(d.decimals)}</span>`;
+      b.onclick = () => (selectMarket(d.id, true), close());
+      body.append(b);
+    }
+  });
+};
+$('#d-reset').onclick = resetBalance;
+$('#d-howto').onclick = () => ((state.drawer = 'help'), render());
+$('#drawer-close').onclick = () => ((state.drawer = null), render());
+$$('#drawer-tabs button').forEach((b) => (b.onclick = () => ((state.posTab = b.dataset.tab), render())));
+$$('.rail-btn').forEach(
+  (b) =>
+    (b.onclick = () => {
+      const r = b.dataset.rail;
+      if (r === 'theme') {
+        state.theme = state.theme === 'light' ? 'dark' : 'light';
+        document.body.classList.toggle('dark', state.theme === 'dark');
+        chart?.setTheme(state.theme);
+        return;
+      }
+      if (r === 'language') {
+        return openSheet('Language', (body) => {
+          const c = chips([['en', 'English']], 'en', () => {}, 2);
+          body.append(c, el('div', 'hint', 'More languages coming soon.'));
+        });
+      }
+      if (r === 'logout') {
+        location.href = '../';
+        return;
+      }
+      if (r === 'positions') state.posTab = 'open';
+      state.drawer = state.drawer === r ? null : r;
+      render();
+    }),
+);
+$('#t-type').onclick = chartSheet;
+$('#t-draw').onclick = () => {
+  if (!chart) return;
+  chart.drawMode = !chart.drawMode;
+  $('#t-draw').classList.toggle('on', chart.drawMode);
+  if (chart.drawMode) toast('Drawing tool', 'Click on the chart to add a horizontal line.');
+};
+$('#t-ind').onclick = () => {
+  if (!chart) return;
+  chart.sma = !chart.sma;
+  $('#t-ind').classList.toggle('on', chart.sma);
+};
+$('#t-dl').onclick = () => chart?.download();
+$('#z-in').onclick = () => chart?.setZoom(chart.zoom * 1.25);
+$('#z-out').onclick = () => chart?.setZoom(chart.zoom / 1.25);
+$('#z-reset').onclick = () => chart?.resetView();
+$('#d-fs').onclick = () => {
+  if (document.fullscreenElement) document.exitFullscreen?.();
+  else document.documentElement.requestFullscreen?.().catch(() => {});
+};
