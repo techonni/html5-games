@@ -13,6 +13,7 @@ export default defineConfig({
         nhami: 'nhami/index.html',
         crash: 'stake-crash/index.html',
         crashPixi: 'crash-pixi/index.html',
+        zunrelBinary: 'zunrel-binary-option/index.html',
       },
     },
   },

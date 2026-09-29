@@ -12,5 +12,5 @@
     "noUnusedParameters": true,
     "types": ["vite/client"]
   },
-  "include": ["crash-pixi/src"]
+  "include": ["crash-pixi/src", "zunrel-binary-option/src"]
 }
