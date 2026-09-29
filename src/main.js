@@ -39,6 +39,8 @@ nav.innerHTML = `
       (g) => `<a href="#/game/${g.id}" data-route="${g.id}"><span class="side-dot" style="background:linear-gradient(135deg,${g.art.bg[0]},${g.art.bg[1]})"></span><span>${g.name}</span></a>`,
     )
     .join('')}
+  <div class="side-title">Trading</div>
+  <a href="./binary-options/">${icon('<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>')}<span>Pixelune Trader</span></a>
   <div class="side-title">Conta</div>
   <a href="#/historico" data-route="historico">${icon('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>')}<span>Histórico</span></a>
   <a href="#/responsavel" data-route="responsavel">${icon('<path d="M12 21s-7-4.4-9.3-9A5.2 5.2 0 0 1 12 6a5.2 5.2 0 0 1 9.3 6c-2.3 4.6-9.3 9-9.3 9z"/>')}<span>Jogo responsável</span></a>
@@ -184,6 +186,21 @@ function lobbyPage() {
     h('div', { class: 'search-row' }, search),
     h('div', { class: 'section-head' }, h('h2', {}, 'Originais'), h('span', { class: 'muted' }, `${games.length} jogos`)),
     grid,
+    h('div', { class: 'section-head' }, h('h2', {}, 'Trading'), h('span', { class: 'muted' }, 'Opções binárias demo')),
+    h(
+      'div',
+      { class: 'games-grid' },
+      h(
+        'a',
+        { class: 'game-card', href: './binary-options/', style: '--c1:#ec5156;--c2:#7a1f3d' },
+        Object.assign(h('div', { class: 'game-card-art' }), {
+          innerHTML:
+            '<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M8 70 26 52 40 62 58 34 72 44 92 18" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="92" cy="18" r="6" fill="#fff"/><rect x="18" y="78" width="30" height="12" rx="6" fill="#55bf8e"/><rect x="52" y="78" width="30" height="12" rx="6" fill="#ffd3d8"/></svg>',
+        }),
+        h('div', { class: 'game-card-name' }, 'TRADER'),
+        h('div', { class: 'game-card-sub' }, 'MULTIPLIERS · RISE/FALL'),
+      ),
+    ),
     h('div', { class: 'section-head' }, h('h2', {}, 'As tuas apostas'), h('a', { href: '#/historico' }, 'Ver tudo')),
     betsTable(8),
   );
