@@ -2,7 +2,8 @@ import { Application, Container, Graphics, type Text } from 'pixi.js';
 import gsap from 'gsap';
 import { C, R } from './theme';
 import { makeText, setTextResolution } from './text';
-import { coinIcon } from './icons';
+import { coinIcon, speaker } from './icons';
+import { sound } from './audio/Sound';
 import { clamp, floor2, fmt, fmtMult } from './format';
 import { CrashEngine, type Phase } from './game/CrashEngine';
 import { CrashView } from './game/CrashView';
@@ -31,6 +32,8 @@ class CrashApp {
   private readonly balancePill = new Container();
   private readonly balanceBg = new Graphics();
   private readonly balanceText: Text;
+  private readonly soundBtn = new Container();
+  private readonly soundIcon = new Graphics();
   private readonly card = new Graphics();
   private readonly view = new CrashView();
   private readonly panel: ControlsPanel;
@@ -47,6 +50,7 @@ class CrashApp {
   private queued: { amount: number; target: number } | null = null;
   private autoOn = false;
   private profit = 0;
+  private lastTick = 0;
 
   constructor() {
     this.engine = new CrashEngine({
@@ -79,6 +83,7 @@ class CrashApp {
       resolution: Math.min(window.devicePixelRatio || 1, 2),
     });
     document.body.appendChild(this.app.canvas);
+    sound.init();
     this.app.stage.addChild(this.root);
 
     this.buildHeader();
@@ -128,7 +133,17 @@ class CrashApp {
         this.toast.show('Créditos demo — sem dinheiro real');
       }
     });
-    this.header.addChild(this.headerBg, this.logo, this.balancePill);
+    const soundBg = new Graphics().roundRect(-22, -22, 44, 44, R.input).fill(C.bgInput);
+    this.soundBtn.addChild(soundBg, speaker(this.soundIcon, sound.muted));
+    this.soundBtn.eventMode = 'static';
+    this.soundBtn.cursor = 'pointer';
+    this.soundBtn.on('pointertap', () => {
+      const muted = sound.toggleMute();
+      speaker(this.soundIcon, muted);
+      if (!muted) sound.play('click');
+      gsap.fromTo(this.soundBtn.scale, { x: 0.85, y: 0.85 }, { x: 1, y: 1, duration: 0.3, ease: 'back.out(3)' });
+    });
+    this.header.addChild(this.headerBg, this.logo, this.soundBtn, this.balancePill);
   }
 
   /** Layout responsivo: coluna única no telemóvel, duas colunas em ecrãs largos. */
@@ -185,6 +200,7 @@ class CrashApp {
     const coin = this.balancePill.getChildByLabel('coin');
     if (coin) coin.position.set(-w + 24, 0);
     this.balancePill.position.set(right, HEADER_H / 2);
+    this.soundBtn.position.set(right - w - 10 - 22, HEADER_H / 2);
   }
 
   private animateBalance(to: number): void {
@@ -205,7 +221,12 @@ class CrashApp {
   private update(dt: number): void {
     this.engine.update(Math.min(dt, 100));
     const e = this.engine;
-    if (e.phase === 'countdown') this.view.updateCountdown(e.remaining, e.countdownMs);
+    if (e.phase === 'countdown') {
+      this.view.updateCountdown(e.remaining, e.countdownMs);
+      const sec = Math.ceil(e.remaining / 1000);
+      if (sec !== this.lastTick && sec <= 3 && sec > 0) sound.play('tick');
+      this.lastTick = sec;
+    }
     else if (e.phase === 'running') this.view.updateRunning(e.flightMs, e.multiplier);
   }
 
@@ -222,7 +243,11 @@ class CrashApp {
       }
     } else if (p === 'running') {
       this.view.enterRunning();
+      sound.play('launch');
+      sound.startEngine();
     } else {
+      sound.stopEngine();
+      sound.play('crash');
       this.view.enterCrashed(e.flightMs, e.multiplier);
       this.view.history.push(e.multiplier);
       if (this.bet && !this.bet.cashed) {
@@ -235,6 +260,7 @@ class CrashApp {
   }
 
   private onTick(m: number): void {
+    sound.setEngineMultiplier(m);
     const b = this.bet;
     if (b && !b.cashed && b.target >= MIN_TARGET && m >= b.target) this.cashOut(b.target);
     else if (b && !b.cashed) this.panel.play.setText(`Retirar ${fmt(floor2(b.amount * m))}`);
@@ -247,6 +273,7 @@ class CrashApp {
     const payout = floor2(b.amount * m);
     this.wallet.add(payout);
     this.settle(payout - b.amount);
+    sound.play('cashout');
     this.view.popCashout(`${fmtMult(m)}  +${fmt(payout)}`);
     this.toast.show(`Ganhaste ${fmt(payout)} · ${fmtMult(m)}`, C.win, C.winText);
     this.refresh();
@@ -259,7 +286,11 @@ class CrashApp {
 
   /** Desconta a aposta; devolve false se não houver saldo. */
   private reserve(): boolean {
-    if (this.wallet.take(this.amount)) return true;
+    if (this.wallet.take(this.amount)) {
+      sound.play('bet');
+      return true;
+    }
+    sound.play('error');
     this.panel.amount.shake();
     this.toast.show('Saldo insuficiente', C.loss);
     return false;

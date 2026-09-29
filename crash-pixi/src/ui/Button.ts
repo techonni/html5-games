@@ -2,6 +2,7 @@ import { Container, Graphics, Rectangle, type Text } from 'pixi.js';
 import gsap from 'gsap';
 import { C, R } from '../theme';
 import { makeText } from '../text';
+import { sound } from '../audio/Sound';
 
 export interface ButtonOptions {
   label: string;
@@ -45,7 +46,9 @@ export class Button extends Container {
     this.on('pointerup', release);
     this.on('pointerupoutside', release);
     this.on('pointertap', () => {
-      if (this.enabled) this.onTap?.();
+      if (!this.enabled) return;
+      sound.play('click');
+      this.onTap?.();
     });
     this.redraw();
   }

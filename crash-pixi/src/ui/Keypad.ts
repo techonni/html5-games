@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { C, R } from '../theme';
 import { makeText } from '../text';
 import { Button } from './Button';
+import { sound } from '../audio/Sound';
 
 export interface KeypadRequest {
   title: string;
@@ -59,7 +60,10 @@ export class Keypad extends Container {
       view.eventMode = 'static';
       view.cursor = 'pointer';
       view.on('pointerdown', () => gsap.fromTo(view.scale, { x: 0.92, y: 0.92 }, { x: 1, y: 1, duration: 0.25, ease: 'back.out(3)' }));
-      view.on('pointertap', () => this.press(key));
+      view.on('pointertap', () => {
+        sound.play('click');
+        this.press(key);
+      });
       this.sheet.addChild(view);
       this.keys.push({ key, view, bg });
     }

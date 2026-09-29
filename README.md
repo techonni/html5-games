@@ -95,4 +95,5 @@ Crash mobile-first feito **só com PixiJS v8 + GSAP + TypeScript**, publicado em
 - Animações em GSAP: pressão dos botões, pílulas do histórico, contagem, explosão do crash, ganho a subir, contador do saldo, folha do teclado.
 - Cores e formas dos tokens "UI Design Rules – HTML5 Games"; layout em coluna no telemóvel e em duas colunas em ecrãs largos.
 - Ronda solo: 5 s de contagem, `m(t) = e^(0.00006·t)`, crash com RTP 99% via `crypto.getRandomValues()`, retirada manual ou automática no alvo; créditos demo guardados no browser.
+- **Som com Howler.js** (`crash-pixi/src/audio/`): cliques, aposta, tique dos últimos 3 s, arranque, motor em loop cujo tom sobe com o multiplicador, retirada e crash. Os sons são sintetizados em código (WAV gerado no browser, sem ficheiros áudio). Botão de som no cabeçalho, com a escolha guardada no browser; fica em silêncio quando o separador está escondido.
 - `npm run typecheck` verifica o TypeScript (`tsconfig.json`); `npm run build` corre o typecheck antes do Vite.
