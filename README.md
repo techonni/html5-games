@@ -71,7 +71,7 @@ Web app mobile em **three.js**, publicada em `/clumsy-monster/`:
 
 Jogo mobile em **flat design** de colecionar e alimentar monstros, publicado em `/nhami/`:
 
-- 9 monstros desenhados em SVG flat (cores sólidas, uma cor de sombra, sem gradientes), com respirar, piscar, comer e saltar.
+- 6 monstros originais em estilo "silhueta de tinta" (preto + azul-noite, olhos brancos em fenda), com 3 fases de evolução (níveis 5 e 10) e ficha de detalhe com fases, tipo, papel e história.
 - Escolha do primeiro monstro, casa com barriga e experiência (a barriga desce com o tempo real), alimentar com comida que voa até à boca, loja com moedas, subir de nível.
 - Explorar: procurar em arbustos, monstros selvagens com raridade (Comum → Lendário) e lançar a bola para os apanhar.
 - Coleção com silhuetas dos monstros por descobrir e troca do monstro ativo.

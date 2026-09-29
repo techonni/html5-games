@@ -1,27 +1,10 @@
 import './style.css';
-import { monsterSVG, ICON, cloud, bush } from './art.js';
+import { ICON, cloud, bush } from './art.js';
+import { SPECIES, creatureSVG, TYPE_COLOR, stageOf } from './creatures.js';
+
+const monsterSVG = (s, opts = {}) => creatureSVG(s, { stage: 1, ...opts });
 
 // ---------------- Dados ----------------
-const SPECIES = [
-  { id: 'bolota', name: 'Bolota', type: 'Planta', rarity: 0, body: 'blob', extra: 'sprout', eyesY: 108, spread: 30,
-    colors: { base: '#7ed957', shade: '#5cb83a', belly: '#d5f5b8', accent: '#58c14a', accentShade: '#3b9030', cheek: '#ff9eb5', feet: '#4fa532' } },
-  { id: 'fagulha', name: 'Fagulha', type: 'Fogo', rarity: 1, body: 'flame', extra: 'none', eyesY: 118, spread: 28,
-    colors: { base: '#ff8a3d', shade: '#e0662a', belly: '#ffd27a', accent: '#ffd27a', accentShade: '#e0662a', cheek: '#ff5a6e', feet: '#c9521c' } },
-  { id: 'gotinha', name: 'Gotinha', type: 'Água', rarity: 0, body: 'drop', extra: 'none', eyesY: 120, spread: 28,
-    colors: { base: '#4db6ff', shade: '#2f8fe0', belly: '#c9ebff', accent: '#c9ebff', accentShade: '#2f8fe0', cheek: '#ff9eb5', feet: '#2677c4' } },
-  { id: 'pipoca', name: 'Pipoca', type: 'Elétrico', rarity: 0, body: 'puff', extra: 'spark', eyesY: 110, spread: 30,
-    colors: { base: '#ffd43b', shade: '#f2b705', belly: '#fff3b0', accent: '#ff9f1c', accentShade: '#e07b00', cheek: '#ff8a5c', feet: '#d99a00' } },
-  { id: 'chiclete', name: 'Chiclete', type: 'Normal', rarity: 0, body: 'cat', extra: 'none', eyesY: 112, spread: 30,
-    colors: { base: '#ff8fb1', shade: '#f26a95', belly: '#ffd6e3', accent: '#ffd6e3', accentShade: '#f26a95', cheek: '#ff5a86', feet: '#d9537d' } },
-  { id: 'rochedo', name: 'Rochedo', type: 'Pedra', rarity: 1, body: 'rock', extra: 'moss', eyesY: 112, spread: 32,
-    colors: { base: '#a7b0be', shade: '#838da0', belly: '#d3d8e0', accent: '#6cc14a', accentShade: '#4fa532', cheek: '#ff9eb5', feet: '#6f788a' } },
-  { id: 'chifrudo', name: 'Chifrudo', type: 'Terra', rarity: 1, body: 'blob', extra: 'horns', eyesY: 108, spread: 30,
-    colors: { base: '#c98a4a', shade: '#a96c33', belly: '#f1d1a6', accent: '#fff6e5', accentShade: '#e0d2bb', cheek: '#ff9e8a', feet: '#8c5626' } },
-  { id: 'nebulina', name: 'Nebulina', type: 'Fantasma', rarity: 2, body: 'ghost', extra: 'none', eyesY: 104, spread: 28,
-    colors: { base: '#b79cff', shade: '#8f6ff0', belly: '#e6dcff', accent: '#e6dcff', accentShade: '#8f6ff0', cheek: '#ff8fc4', feet: 'transparent' } },
-  { id: 'cristalino', name: 'Cristalino', type: 'Cristal', rarity: 3, body: 'crystal', extra: 'shine', eyesY: 110, spread: 26,
-    colors: { base: '#5ce1e6', shade: '#2fb8c4', belly: '#c8f7f9', accent: '#c8f7f9', accentShade: '#2fb8c4', cheek: '#ff9eb5', feet: '#239aa6' } },
-];
 const RARITY = [
   { name: 'Comum', color: '#58c14a', weight: 50, catch: 0.85 },
   { name: 'Incomum', color: '#4da3ff', weight: 30, catch: 0.65 },
@@ -34,13 +17,13 @@ const FOODS = [
   { id: 'fish', name: 'Peixe', price: 15, fill: 35, xp: 25 },
   { id: 'cake', name: 'Bolo', price: 30, fill: 60, xp: 50 },
 ];
-const STARTERS = ['bolota', 'fagulha', 'gotinha'];
+const STARTERS = ['birra', 'medo', 'preguica'];
 const sp = (id) => SPECIES.find((s) => s.id === id);
 const xpNeed = (lvl) => 40 + lvl * 20;
 const DECAY_MS = 3 * 60 * 1000; // −1% de barriga a cada 3 minutos
 
 // ---------------- Estado (guardado no browser) ----------------
-const KEY = 'nhami.v1';
+const KEY = 'nhami.v2';
 let S;
 try {
   S = JSON.parse(localStorage.getItem(KEY));
@@ -152,12 +135,12 @@ function homeScreen() {
     <section class="scene home-scene">
       <div class="cloud c1">${cloud()}</div><div class="cloud c2">${cloud()}</div><div class="cloud c3">${cloud()}</div>
       <div class="platform"></div>
-      <button class="mon-wrap ${moodClass(m)}" id="mon" aria-label="Fazer festinhas ao ${s.name}">${monsterSVG(s)}</button>
+      <button class="mon-wrap ${moodClass(m)}" id="mon" aria-label="Fazer festinhas ao ${s.name}">${monsterSVG(s, { stage: stageOf(m.level) })}</button>
       <div class="bubble" id="bubble" hidden></div>
     </section>
     <section class="info">
       <p class="eyebrow">Nível ${m.level} · ${s.type}</p>
-      <h1 class="mon-name">${s.name}</h1>
+      <button class="mon-name" data-detail="${s.id}">${s.name}</button>
       <div class="stat"><span>Barriga</span><b>${m.belly}%</b></div>
       ${bar(m.belly, 100, bellyColor(m.belly))}
       <div class="stat"><span>Experiência</span><b>${m.xp}/${need}</b></div>
@@ -205,13 +188,13 @@ function dexScreen() {
         const owned = S.team.find((m) => m.sp === s.id);
         const r = RARITY[s.rarity];
         return owned
-          ? `<button class="tile dex-card${owned.uid === S.active ? ' active' : ''}" data-pick="${owned.uid}">
-              ${monsterSVG(s)}
+          ? `<button class="tile dex-card${owned.uid === S.active ? ' active' : ''}" data-detail="${s.id}">
+              ${monsterSVG(s, { stage: stageOf(owned.level), shadow: false })}
               <b>${s.name}</b>
               <span class="chip" style="background:${r.color}">${r.name}</span>
               <small>Nv. ${owned.level}</small>
             </button>`
-          : `<div class="tile dex-card locked">${monsterSVG(s, { silhouette: true })}<b>???</b><span class="chip grey">${r.name}</span></div>`;
+          : `<div class="tile dex-card locked">${monsterSVG(s, { silhouette: true, stage: 3, shadow: false })}<b>???</b><span class="chip grey">${r.name}</span></div>`;
       }).join('')}
     </section>
     ${nav()}`;
@@ -223,17 +206,17 @@ function starterScreen() {
       <p class="eyebrow">Bem-vindo ao Nhami</p>
       <h1>Escolhe o teu primeiro monstro</h1>
       <div class="starters">
-        ${STARTERS.map((id, i) => `<button class="tile starter-card${i === 0 ? ' on' : ''}" data-starter="${id}">${monsterSVG(sp(id))}<b>${sp(id).name}</b><span>${sp(id).type}</span></button>`).join('')}
+        ${STARTERS.map((id, i) => `<button class="tile starter-card${i === 0 ? ' on' : ''}" data-starter="${id}">${monsterSVG(sp(id), { shadow: false })}<b>${sp(id).name}</b><span>${sp(id).type}</span></button>`).join('')}
       </div>
-      <p class="starter-desc" id="starter-desc">${starterDesc('bolota')}</p>
-      <button class="btn btn-green" id="starter-go">Escolher Bolota</button>
+      <p class="starter-desc" id="starter-desc">${starterDesc('birra')}</p>
+      <button class="btn btn-green" id="starter-go" data-id="birra">Escolher Birra</button>
     </section>`;
 }
 function starterDesc(id) {
   return {
-    bolota: 'Calmo e guloso. Adora maçãs e sestas ao sol.',
-    fagulha: 'Cheio de energia. Fica muito rabugento com fome.',
-    gotinha: 'Curioso e brincalhão. Nunca diz não a um peixe.',
+    birra: 'Pavio curto, coração grande. Bate o pé quando tem fome.',
+    medo: 'Assusta-se com tudo, mas é o amigo mais leal que vais ter.',
+    preguica: 'Dorme quase o dia todo. Cresce devagar, mas fica enorme.',
   }[id];
 }
 
@@ -307,11 +290,53 @@ function switchSheet() {
     `<div class="team">${S.team
       .map((m) => {
         const s = sp(m.sp);
-        return `<button class="tile team-row${m.uid === S.active ? ' on' : ''}" data-pick="${m.uid}">${monsterSVG(s)}<div><b>${s.name}</b><small>Nível ${m.level} · Barriga ${m.belly}%</small></div></button>`;
+        return `<button class="tile team-row${m.uid === S.active ? ' on' : ''}" data-pick="${m.uid}">${monsterSVG(s, { stage: stageOf(m.level), shadow: false })}<div><b>${s.name}</b><small>Nível ${m.level} · Barriga ${m.belly}%</small></div></button>`;
       })
       .join('')}</div>`,
   );
   w.querySelectorAll('[data-pick]').forEach((b) => (b.onclick = () => pick(b.dataset.pick)));
+}
+
+function detailSheet(id) {
+  const s = sp(id);
+  const owned = S.team.find((m) => m.sp === id);
+  const maxStage = owned ? stageOf(owned.level) : 1;
+  const r = RARITY[s.rarity];
+  const tc = TYPE_COLOR[s.type];
+  const w = sheet(
+    '',
+    `<div class="dt">
+      <div class="dt-tags"><span class="dt-num">#${String(s.num).padStart(2, '0')}<i>·</i>${s.name.toUpperCase()}</span>
+        <span class="dt-type" style="color:${tc};border-color:${tc};background:${tc}14"><i style="background:${tc}"></i>${s.type.toUpperCase()}</span></div>
+      <div class="dt-art" id="dt-art">${monsterSVG(s, { stage: maxStage })}</div>
+      <div class="dt-stages">${[1, 2, 3]
+        .map((st) => `<button class="dt-stage${st === maxStage ? ' on' : ''}${st > maxStage ? ' locked' : ''}" data-stage="${st}" aria-label="Fase ${st}">${monsterSVG(s, { stage: st, shadow: false, silhouette: st > maxStage })}</button>`)
+        .join('')}</div>
+      <div class="dt-row">
+        <div class="dt-badges"><span>${ICON.star}${r.name}</span><span><i class="dot" style="background:${tc}"></i>Tipo ${s.type}</span><span>${ICON.bolt}${s.role}</span></div>
+        <div class="dt-stagecard"><b id="dt-stage-title">Fase ${maxStage}</b><p id="dt-stage-text">${s.stages[maxStage - 1]}</p></div>
+      </div>
+      <p class="dt-lore">${s.lore}</p>
+      ${owned ? `<button class="btn btn-blue" id="dt-pick">${owned.uid === S.active ? 'Está contigo' : 'Levar comigo'}</button>` : '<p class="hint">Apanha um em Explorar para o desbloquear.</p>'}
+    </div>`,
+  );
+  w.querySelectorAll('[data-stage]').forEach(
+    (b) =>
+      (b.onclick = () => {
+        const st = Number(b.dataset.stage);
+        w.querySelectorAll('.dt-stage').forEach((x) => x.classList.toggle('on', x === b));
+        if (st > maxStage) {
+          $('#dt-art', w).innerHTML = monsterSVG(s, { stage: st, silhouette: true });
+          $('#dt-stage-title', w).textContent = `Fase ${st} · bloqueada`;
+          $('#dt-stage-text', w).textContent = `Chega ao nível ${st === 2 ? 5 : 10} para descobrir.`;
+          return;
+        }
+        $('#dt-art', w).innerHTML = monsterSVG(s, { stage: st });
+        $('#dt-stage-title', w).textContent = `Fase ${st}`;
+        $('#dt-stage-text', w).textContent = s.stages[st - 1];
+      }),
+  );
+  if (owned) $('#dt-pick', w).onclick = () => pick(owned.uid);
 }
 
 function pick(uid) {
@@ -365,6 +390,7 @@ function feed(foodId, fromEl) {
     m.belly = Math.min(100, m.belly + f.fill);
     m.xp += f.xp;
     let leveled = false;
+    const stageBefore = stageOf(m.level);
     while (m.xp >= xpNeed(m.level)) {
       m.xp -= xpNeed(m.level);
       m.level++;
@@ -373,13 +399,27 @@ function feed(foodId, fromEl) {
     setTimeout(() => {
       busy = false;
       render();
-      if (leveled) {
+      if (leveled && stageOf(m.level) > stageBefore) {
+        evolve(m);
+      } else if (leveled) {
         confetti();
         toast(`${ICON.star} <b>${sp(m.sp).name}</b> subiu para o nível ${m.level}!`);
         $('#mon')?.classList.add('jump');
       } else say(['Nham nham!', 'Que bom!', 'Mais! Mais!', 'Delicioso!'][Math.floor(Math.random() * 4)]);
     }, 750);
   };
+}
+
+// Evolução: flash branco na silhueta, crescimento e confetes.
+function evolve(m) {
+  const mon = $('#mon');
+  mon?.classList.add('evolving');
+  setTimeout(() => {
+    render();
+    $('#mon')?.classList.add('evolved');
+    confetti();
+    toast(`${ICON.star} <b>${sp(m.sp).name}</b> evoluiu para a fase ${stageOf(m.level)}!`);
+  }, 1200);
 }
 
 function say(text) {
@@ -400,7 +440,8 @@ function rollSpecies() {
     x -= RARITY[rar].weight;
     if (x <= 0) break;
   }
-  const pool = SPECIES.filter((s) => s.rarity === Math.min(rar, 3));
+  let pool = SPECIES.filter((s) => s.rarity === Math.min(rar, 3));
+  if (!pool.length) pool = SPECIES.filter((s) => s.rarity === 0);
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
@@ -419,7 +460,7 @@ function searchBush(i, el) {
     wild = { s, bush: i };
     const w = $('#wild');
     w.className = `wild at-${i}`;
-    w.innerHTML = monsterSVG(s);
+    w.innerHTML = monsterSVG(s, { stage: 1, shadow: false });
     w.hidden = false;
     const r = RARITY[s.rarity];
     const known = S.seen.includes(s.id);
@@ -509,6 +550,7 @@ app.addEventListener('click', (e) => {
   if (t.dataset.act === 'feed') return screen === 'home' ? feedSheet() : ((screen = 'home'), render(), feedSheet());
   if (t.dataset.act === 'switch') return switchSheet();
   if (t.dataset.pick) return pick(t.dataset.pick);
+  if (t.dataset.detail) return detailSheet(t.dataset.detail);
   if (t.dataset.bush) return searchBush(Number(t.dataset.bush), t);
   if (t.id === 'mon') {
     t.classList.remove('jump');
@@ -528,7 +570,7 @@ app.addEventListener('click', (e) => {
     return;
   }
   if (t.id === 'starter-go') {
-    const m = addMonster(t.dataset.id || 'bolota');
+    const m = addMonster(t.dataset.id || 'birra');
     S.active = m.uid;
     screen = 'home';
     render();
