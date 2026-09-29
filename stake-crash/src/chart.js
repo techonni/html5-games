@@ -73,8 +73,9 @@ export async function createChart(host) {
     const fs = Math.round(Math.min(72, Math.max(42, W * 0.16)));
     face.style.fontSize = fs;
     shadow.style.fontSize = fs;
-    face.position.set(W / 2, H * 0.38);
-    shadow.position.set(W / 2 + 3, H * 0.38 + 5);
+    // Slightly higher so status pills (countdown / crashed) sit cleanly below
+    face.position.set(W / 2, H * 0.34);
+    shadow.position.set(W / 2 + 3, H * 0.34 + 5);
 
     bg.clear().rect(0, 0, W, H).fill(0x0b1a24);
 
@@ -121,17 +122,17 @@ export async function createChart(host) {
       face.style.fill = 0xffffff;
       shadow.style.fill = 0xed6363;
       shadow.alpha = 1;
-      shadow.position.set(W / 2 + 4, H * 0.38 + 6);
+      shadow.position.set(W / 2 + 4, H * 0.34 + 6);
     } else if (phase === 'flying') {
       face.style.fill = 0xffffff;
       shadow.style.fill = 0x6ea8ff;
       shadow.alpha = 0.9;
-      shadow.position.set(W / 2 + 3, H * 0.38 + 5);
+      shadow.position.set(W / 2 + 3, H * 0.34 + 5);
     } else {
       face.style.fill = 0xffffff;
       shadow.style.fill = 0x3d5a73;
       shadow.alpha = 0.55;
-      shadow.position.set(W / 2 + 2, H * 0.38 + 4);
+      shadow.position.set(W / 2 + 2, H * 0.34 + 4);
       if (phase === 'waiting' || phase === 'idle') {
         face.text = '1.00x';
         shadow.text = '1.00x';
