@@ -13,6 +13,11 @@ const PAD_T = 30;
 const PAD_R = 30;
 const K = 0.00011; // velocidade de crescimento: m(t) = e^(K·ms)
 const COUNTDOWN_MS = 2500; // "descolagem" antes de cada ronda, à imagem da Stake
+const GRID_SPACING = 40; // espaçamento (px) entre os pontos da grelha de fundo
+const GRID_DOT_RADIUS = 1.2; // raio (px) de cada ponto da grelha
+const FLAME_BASE_LENGTH = 10; // comprimento base da chama do foguetão
+const FLAME_WAVE_AMPLITUDE = 3; // oscilação suave e periódica da chama
+const FLAME_JITTER_AMPLITUDE = 4; // tremeluzir aleatório sobreposto à onda
 
 const multAt = (ms) => Math.exp(K * ms);
 const msFor = (m) => Math.log(m) / K;
@@ -47,8 +52,8 @@ export default {
 
     // Grelha pontilhada de fundo, ao estilo Stake.
     const grid = new Graphics();
-    for (let x = gx0; x <= gx1 + 1; x += 40) {
-      for (let y = gy1; y <= gy0 + 1; y += 40) grid.circle(x, y, 1.2);
+    for (let x = gx0; x <= gx1 + 1; x += GRID_SPACING) {
+      for (let y = gy1; y <= gy0 + 1; y += GRID_SPACING) grid.circle(x, y, GRID_DOT_RADIUS);
     }
     grid.fill({ color: COLORS.line, alpha: 0.5 });
 
@@ -163,7 +168,7 @@ export default {
       rocket.rotation = Math.atan2(tip.y - prev.y, tip.x - prev.x);
 
       // Chama a tremeluzir atrás do foguetão.
-      const flicker = 10 + Math.sin(ms / 40) * 3 + Math.random() * 4;
+      const flicker = FLAME_BASE_LENGTH + Math.sin(ms / 40) * FLAME_WAVE_AMPLITUDE + Math.random() * FLAME_JITTER_AMPLITUDE;
       flame.clear().poly([-14, -4, -14 - flicker, 0, -14, 4]).fill({ color: COLORS.yellow, alpha: 0.9 });
     };
     draw(0);
