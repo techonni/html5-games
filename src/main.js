@@ -96,9 +96,10 @@ async function mountGame(game, controls, host, recentEl) {
     onLeave(fn) {
       s.leave.push(fn);
     },
-    recent(label, win) {
+    recent(label, win, tier) {
       if (s.cancelled) return;
-      recentEl.prepend(h('span', { class: `pill ${win ? 'pill-win' : ''}` }, label));
+      const cls = win ? 'pill-win' : tier ? `pill-${tier}` : '';
+      recentEl.prepend(h('span', { class: `pill ${cls}` }, label));
       while (recentEl.children.length > 10) recentEl.lastChild.remove();
     },
   };

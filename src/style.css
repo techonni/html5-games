@@ -220,6 +220,9 @@ select.input { appearance: none; cursor: pointer; background-image: linear-gradi
 .recent { position: absolute; top: 12px; right: 12px; z-index: 2; display: flex; gap: 6px; max-width: calc(100% - 24px); overflow: hidden; flex-direction: row; justify-content: flex-end; }
 .pill { flex: none; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; background: var(--panel-2); color: var(--muted); font-variant-numeric: tabular-nums; animation: pop .25s ease-out; }
 .pill-win { background: var(--green); color: var(--green-dark); }
+.pill-blue { background: #1c3a63; color: #7fb4ff; }
+.pill-purple { background: #2c1f5c; color: #c3a6ff; }
+.pill-pink { background: #4a1a3a; color: #ff9fd6; }
 @keyframes pop { from { transform: scale(.6); opacity: 0; } }
 .game-bar {
   display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;

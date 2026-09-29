@@ -12,16 +12,20 @@ const PAD_B = 50;
 const PAD_T = 30;
 const PAD_R = 30;
 const K = 0.00011; // velocidade de crescimento: m(t) = e^(K·ms)
+const COUNTDOWN_MS = 2500; // "descolagem" antes de cada ronda, à imagem da Stake
 
 const multAt = (ms) => Math.exp(K * ms);
 const msFor = (m) => Math.log(m) / K;
+
+// Cor da pastilha do histórico consoante o escalão do multiplicador (como na Stake).
+const tierOf = (m) => (m < 2 ? 'blue' : m < 10 ? 'purple' : 'pink');
 
 export default {
   id: 'crash',
   name: 'Crash',
   tagline: 'O multiplicador sobe… levanta antes de rebentar!',
   rules:
-    'Depois de apostares, o multiplicador começa em 1.00× e sobe cada vez mais depressa até rebentar num ponto aleatório. Carrega em "Levantar" antes disso para ganhar aposta × multiplicador. Podes definir um levantamento automático.',
+    'Depois de apostares, há uma contagem decrescente de descolagem e o multiplicador começa em 1.00×, subindo cada vez mais depressa até rebentar num ponto aleatório. Carrega em "Levantar" antes disso para ganhar aposta × multiplicador. Podes definir um levantamento automático.',
   edge: '1%',
 
   async mount(ctx) {
@@ -39,11 +43,31 @@ export default {
     const gy0 = H - PAD_B;
     const gy1 = PAD_T;
 
+    // Grelha pontilhada de fundo, ao estilo Stake.
+    const grid = new Graphics();
+    for (let x = gx0; x <= gx1 + 1; x += 40) {
+      for (let y = gy1; y <= gy0 + 1; y += 40) grid.circle(x, y, 1.2).fill({ color: COLORS.line, alpha: 0.5 });
+    }
+
     const axes = new Graphics();
     const labels = new Container();
     const curve = new Graphics();
-    const rocket = new Graphics().poly([14, 0, -10, -9, -5, 0, -10, 9]).fill(0xffffff).circle(-12, 0, 4).fill(COLORS.yellow);
-    root.addChild(axes, labels, curve, rocket);
+    const glowTrail = new Graphics();
+
+    // Foguetão: corpo + janela + barbatanas + chama animada (sem imagens, só vetores).
+    const rocket = new Container();
+    const flame = new Graphics();
+    const body = new Graphics()
+      .poly([16, 0, -6, -8, -14, -5, -14, 5, -6, 8])
+      .fill(0xffffff)
+      .poly([-6, -8, -14, -5, -10, -6])
+      .fill(COLORS.red)
+      .poly([-6, 8, -14, 5, -10, 6])
+      .fill(COLORS.red)
+      .circle(4, 0, 4)
+      .fill(COLORS.blue);
+    rocket.addChild(flame, body);
+    root.addChild(grid, axes, labels, glowTrail, curve, rocket);
 
     const big = new Text({ text: '1.00×', style: { fontFamily: FONT, fontSize: 84, fontWeight: '800', fill: 0xffffff } });
     big.anchor.set(0.5);
@@ -95,25 +119,35 @@ export default {
       axes.stroke({ width: 1, color: COLORS.line, alpha: 0.6 });
 
       curve.clear();
+      glowTrail.clear();
       if (ms <= 0) {
         rocket.visible = false;
         return;
       }
       const steps = 80;
-      curve.moveTo(px(0), py(1));
-      for (let i = 1; i <= steps; i++) {
-        const t = (ms * i) / steps;
-        curve.lineTo(px(t), py(multAt(t)));
-      }
-      curve.lineTo(px(ms), gy0).lineTo(px(0), gy0).closePath();
       const color = crashed ? COLORS.red : COLORS.yellow;
-      curve.fill({ color, alpha: 0.18 });
-      curve.moveTo(px(0), py(1));
-      for (let i = 1; i <= steps; i++) {
+      const pts = [];
+      for (let i = 0; i <= steps; i++) {
         const t = (ms * i) / steps;
-        curve.lineTo(px(t), py(multAt(t)));
+        pts.push([px(t), py(multAt(t))]);
       }
-      curve.stroke({ width: 5, color, cap: 'round', join: 'round' });
+
+      curve.moveTo(pts[0][0], pts[0][1]);
+      pts.slice(1).forEach(([x, y]) => curve.lineTo(x, y));
+      curve.lineTo(px(ms), gy0).lineTo(px(0), gy0).closePath();
+      curve.fill({ color, alpha: 0.18 });
+
+      // Brilho suave por trás da linha principal (efeito "neon" da Stake).
+      glowTrail.moveTo(pts[0][0], pts[0][1]);
+      pts.slice(1).forEach(([x, y]) => glowTrail.lineTo(x, y));
+      glowTrail.stroke({ width: 16, color, alpha: 0.16, cap: 'round', join: 'round' });
+
+      curve.moveTo(pts[0][0], pts[0][1]);
+      pts.slice(1).forEach(([x, y]) => curve.lineTo(x, y));
+      curve.stroke({ width: 4, color, cap: 'round', join: 'round' });
+      curve.moveTo(pts[0][0], pts[0][1]);
+      pts.slice(1).forEach(([x, y]) => curve.lineTo(x, y));
+      curve.stroke({ width: 1.5, color: 0xffffff, alpha: 0.85, cap: 'round', join: 'round' });
       if (cashedAt) {
         const cm = Math.min(cashedAt, m);
         curve.circle(px(msFor(cm)), py(cm), 7).fill(COLORS.green);
@@ -124,28 +158,38 @@ export default {
       const prev = { x: px(ms * 0.97), y: py(multAt(ms * 0.97)) };
       rocket.position.set(tip.x, tip.y);
       rocket.rotation = Math.atan2(tip.y - prev.y, tip.x - prev.x);
+
+      // Chama a tremeluzir atrás do foguetão.
+      const flicker = 10 + Math.sin(ms / 40) * 3 + Math.random() * 4;
+      flame.clear().poly([-14, -4, -14 - flicker, 0, -14, 4]).fill({ color: COLORS.yellow, alpha: 0.9 });
     };
     draw(0);
 
     // ---- Estado da ronda ----
-    let round = null; // { amount, crash, auto, start, cashed }
+    let round = null; // { amount, crash, auto, phase, countdownStart, start, cashed }
 
     const setButton = () => {
       if (!round) {
         play.textContent = 'Apostar';
         play.classList.remove('btn-cashout');
+        play.disabled = false;
+      } else if (round.phase === 'countdown') {
+        play.textContent = 'A aguardar descolagem…';
+        play.classList.remove('btn-cashout');
+        play.disabled = true;
       } else if (round.cashed) {
         play.textContent = 'A aguardar fim da ronda…';
+        play.disabled = true;
       } else {
         play.textContent = `Levantar ${money(round.amount * multAt(performance.now() - round.start))}`;
         play.classList.add('btn-cashout');
+        play.disabled = false;
       }
-      play.disabled = !!round && !!round.cashed;
       bet.disabled = autoIn.disabled = !!round;
     };
 
     const cashout = (m) => {
-      if (!round || round.cashed || m >= round.crash) return;
+      if (!round || round.phase !== 'flying' || round.cashed || m >= round.crash) return;
       round.cashed = Math.floor(m * 100) / 100;
       wallet.settle('Crash', round.amount, round.cashed);
       status.text = `Levantaste a ${mult(round.cashed)} · +${money(round.amount * round.cashed)}`;
@@ -159,13 +203,13 @@ export default {
       const r = round;
       round = null;
       if (!r.cashed) wallet.settle('Crash', r.amount, 0);
-      ctx.recent(mult(r.crash), !!r.cashed);
+      ctx.recent(mult(r.crash), !!r.cashed, tierOf(r.crash));
       setButton();
     };
 
     // Ao sair da página a meio da ronda, levanta automaticamente ao multiplicador atual.
     ctx.onLeave(() => {
-      if (round && !round.cashed) {
+      if (round && round.phase === 'flying' && !round.cashed) {
         const m = multAt(performance.now() - round.start);
         if (m < round.crash) cashout(m);
       }
@@ -174,6 +218,25 @@ export default {
 
     app.ticker.add(() => {
       if (!round) return;
+
+      if (round.phase === 'countdown') {
+        const left = COUNTDOWN_MS - (performance.now() - round.countdownStart);
+        if (left <= 0) {
+          round.phase = 'flying';
+          round.start = performance.now();
+          status.text = 'Em curso…';
+          status.style.fill = COLORS.muted;
+          setButton();
+          return;
+        }
+        draw(0);
+        big.text = `${Math.ceil(left / 1000)}`;
+        big.style.fill = COLORS.yellow;
+        status.text = 'A preparar descolagem…';
+        status.style.fill = COLORS.muted;
+        return;
+      }
+
       const ms = performance.now() - round.start;
       const m = multAt(ms);
       if (m >= round.crash) {
@@ -195,10 +258,11 @@ export default {
     });
 
     play.addEventListener('click', () => {
-      if (round) {
+      if (round && round.phase === 'flying') {
         cashout(multAt(performance.now() - round.start));
         return;
       }
+      if (round) return;
       const amount = bet.value;
       const auto = parseFloat(autoIn.value);
       if (!takeBet(amount)) return;
@@ -206,11 +270,13 @@ export default {
         amount,
         crash: crashPoint(),
         auto: auto >= 1.01 ? auto : null,
-        start: performance.now(),
+        phase: 'countdown',
+        countdownStart: performance.now(),
+        start: null,
         cashed: null,
       };
-      big.style.fill = 0xffffff;
-      status.text = 'Em curso…';
+      big.style.fill = COLORS.yellow;
+      status.text = 'A preparar descolagem…';
       status.style.fill = COLORS.muted;
       setButton();
     });
