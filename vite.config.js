@@ -10,6 +10,7 @@ export default defineConfig({
         main: 'index.html',
         trader: 'binary-options/index.html',
         monster: 'clumsy-monster/index.html',
+        nhami: 'nhami/index.html',
       },
     },
   },
