@@ -25,6 +25,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      # Site zunrel.com (servido pelo Vercel a partir de /zunrel/ no GitHub Pages)
+      - run: npx vite build --config vite.zunrel.config.js --base ./ --outDir ../dist/zunrel
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
