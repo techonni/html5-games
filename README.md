@@ -66,3 +66,13 @@ Web app mobile em **three.js**, publicada em `/clumsy-monster/`:
 - Tocar num monstro faz com que tropece e caia; arrastar roda-o. O monstro escolhido fica guardado e aparece no centro do ecrã inicial.
 - Um único canvas WebGL desenha várias zonas da página (scissor), por isso os monstros podem "sair" dos cartões.
 - No telemóvel os ecrãs deslizam (com botão de voltar do browser); no desktop aparecem lado a lado, como no mockup.
+
+## Nhami (`nhami/`)
+
+Jogo mobile em **flat design** de colecionar e alimentar monstros, publicado em `/nhami/`:
+
+- 9 monstros desenhados em SVG flat (cores sólidas, uma cor de sombra, sem gradientes), com respirar, piscar, comer e saltar.
+- Escolha do primeiro monstro, casa com barriga e experiência (a barriga desce com o tempo real), alimentar com comida que voa até à boca, loja com moedas, subir de nível.
+- Explorar: procurar em arbustos, monstros selvagens com raridade (Comum → Lendário) e lançar a bola para os apanhar.
+- Coleção com silhuetas dos monstros por descobrir e troca do monstro ativo.
+- Componentes flat estilo "tátil": botões com degrau sólido, tiles com contorno de 2px, barras de progresso arredondadas. Tudo guardado no browser.
