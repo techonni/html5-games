@@ -67,6 +67,15 @@ Web app mobile em **three.js**, publicada em `/clumsy-monster/`:
 - Um único canvas WebGL desenha várias zonas da página (scissor), por isso os monstros podem "sair" dos cartões.
 - No telemóvel os ecrãs deslizam (com botão de voltar do browser); no desktop aparecem lado a lado, como no mockup.
 
+## Stake Crash (`stake-crash/`)
+
+Clone mobile-first estilo **Stake.us Crash** em PixiJS, publicado em `/stake-crash/`:
+
+- UI pixel-perfect (header Stake.us, histórico de multiplicadores, painel de aposta Amount / Cashout At / Net Gain, Manual/Auto, nav inferior).
+- Canvas PixiJS v8 com curva exponencial, multiplicador 3D e tip animado; estados Waiting (5s) → Flying → Crashed.
+- RTP 99% via `crypto.getRandomValues()`; cashout automático no alvo; créditos demo em Gold (G).
+- Regras: aposta no intervalo de 5s; o foguetão sobe; se atingir o teu cashout antes de rebentar, ganhas; caso contrário, perdes.
+
 ## Nhami (`nhami/`)
 
 Jogo mobile em **flat design** de colecionar e alimentar monstros, publicado em `/nhami/`:
@@ -76,13 +85,3 @@ Jogo mobile em **flat design** de colecionar e alimentar monstros, publicado em 
 - Explorar: procurar em arbustos, monstros selvagens com raridade (Comum → Lendário) e lançar a bola para os apanhar.
 - Coleção com silhuetas dos monstros por descobrir e troca do monstro ativo.
 - Componentes flat estilo "tátil": botões com degrau sólido, tiles com contorno de 2px, barras de progresso arredondadas. Tudo guardado no browser.
-
-## Zunrel Crash (`stake-crash/`)
-
-Crash gratuito em PixiJS v8 + Bootstrap 5.3.8, responsivo (mobile, tablet e desktop; em desktop os controlos ficam à esquerda e o palco à direita), interface em francês. Créditos fictícios (1 000 G), sem dinheiro real.
-
-- Jogo completo: apostas manuais e automáticas, retirada manual ou automática, ½ / 2×, atalho Espaço, histórico, estatísticas, definições (sons, animações, notificações).
-- Equidade verificável: hash SHA-256 publicado antes de cada ronda, semente revelada no fim e verificador na janela "Équité".
-- Conta demo (Connexion / Inscription) guardada em localStorage, chat simulado, Parcourir / Pour vous, sauvegardar e seguir.
-
-Publicado em `/stake-crash/`.

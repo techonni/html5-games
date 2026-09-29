@@ -9,7 +9,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "bootstrap": "^5.3.8",
     "pixi.js": "^8.21.0",
     "three": "^0.186.1"
   },
