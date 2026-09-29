@@ -229,14 +229,16 @@ button {
   background: #0b1a24;
   overflow: hidden;
   border: 1px solid rgba(47, 69, 83, 0.5);
+  flex-shrink: 0;
 }
 
 .stage {
   width: 100%;
-  height: min(42vw, 220px);
-  min-height: 180px;
-  max-height: 260px;
+  height: min(56vw, 280px);
+  min-height: 220px;
+  max-height: 320px;
   position: relative;
+  flex-shrink: 0;
 }
 
 .stage canvas {

@@ -61,6 +61,9 @@ function load() {
   } catch {
     /* ignore */
   }
+  if (!history.length) {
+    history = [1.44, 2.45, 1.28, 3.12, 1.05, 10.02, 25.97, 1.08];
+  }
 }
 
 function save() {
