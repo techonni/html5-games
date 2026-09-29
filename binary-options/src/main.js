@@ -10,20 +10,56 @@ const phone = $('#phone');
 // ---------- Estado ----------
 const START_BALANCE = 10000;
 const MULTIPLIERS = [1, 10, 20, 40, 60, 100, 200, 300];
-const RISE_FALL_PAYOUT = 1.95;
-const TRADE_TYPES = { multipliers: 'Multipliers', risefall: 'Rise/Fall' };
+const TRADE_TYPES = { binary: 'Binary', digital: 'Digital', turbo: 'Turbo', multipliers: 'Multipliers' };
+// Opções binárias: prazos em segundos e lucro fixo (em % da aposta).
+const DURATIONS = {
+  binary: [60, 120, 300, 600, 900],
+  digital: [60, 120, 300, 600],
+  turbo: [30, 60, 120, 180, 300],
+};
+const FIXED_PROFIT = { binary: 0.85, turbo: 0.8 };
+const STRIKES = [-3, -2, -1, 0, 1, 2, 3];
+const isBinary = (type) => type !== 'multipliers';
+
+// Função de distribuição normal (aproximação de Abramowitz-Stegun).
+function normCdf(x) {
+  const t = 1 / (1 + 0.2316419 * Math.abs(x));
+  const d = 0.3989423 * Math.exp((-x * x) / 2);
+  const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  return x > 0 ? 1 - p : p;
+}
+
+// Distância entre níveis de strike: meio desvio padrão do movimento esperado até ao vencimento.
+function strikeStep(m, seconds) {
+  const raw = m.last.quote * m.sigma * Math.sqrt(seconds) * 0.5;
+  const p = 10 ** Math.floor(Math.log10(raw));
+  return [1, 2, 2.5, 5, 10].map((k) => k * p).find((v) => v >= raw);
+}
+
+// Lucro (em % da aposta) de um contrato binário.
+function profitRate(type, dir, k) {
+  if (type !== 'digital') return FIXED_PROFIT[type];
+  // Probabilidade de terminar além do strike (k níveis de 0.5σ): quanto mais longe, maior o payout.
+  const z = k * 0.5;
+  const pWin = dir === 'up' ? 1 - normCdf(z) : normCdf(z);
+  return Math.min(9, Math.max(0.1, 0.88 / pWin - 1));
+}
+
+const fmtDur = (s) => (s < 60 ? `${s}s` : `${s / 60}m`);
+const fmtClock = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
 const state = {
   balance: START_BALANCE,
   view: 'trade',
-  tradeType: 'multipliers',
+  tradeType: 'binary',
   market: 'R_100',
   dir: 'up',
   mult: 1,
   stake: 2,
   tp: null,
   sl: null,
-  duration: 5,
+  durations: { binary: 60, digital: 60, turbo: 30 },
+  strike: 0,
   chartMode: 'tick',
   open: [],
   closed: [],
@@ -66,6 +102,7 @@ $('#plus-btn').innerHTML = icons.plus;
 $('#chart-menu').innerHTML = icons.dots;
 $$('.chev').forEach((c) => (c.innerHTML = icons.chevron));
 $('.toast-ico').innerHTML = icons.stopwatch;
+$('.expiry-ico').innerHTML = icons.stopwatch;
 const navIcons = () => {
   $$('#tabbar button').forEach((b) => {
     const nav = b.dataset.nav;
@@ -86,8 +123,19 @@ function contractPL(c) {
     const move = ((q - c.entry) / c.entry) * (c.dir === 'up' ? 1 : -1);
     return r2(c.stake * c.mult * move - c.commission);
   }
-  const winning = c.dir === 'up' ? q > c.entry : q < c.entry;
-  return winning ? r2(c.stake * RISE_FALL_PAYOUT - c.stake) : -c.stake;
+  return binaryResult(c, q);
+}
+
+// Tudo ou nada: ganha o lucro fixo, perde 100% da aposta; empate exato devolve a aposta.
+function binaryResult(c, q) {
+  if (q === c.strike) return 0;
+  const win = c.dir === 'up' ? q > c.strike : q < c.strike;
+  return win ? r2(c.payout - c.stake) : -c.stake;
+}
+
+function quoteAt(m, epoch) {
+  for (let i = m.ticks.length - 1; i >= 0; i--) if (m.ticks[i].epoch <= epoch) return m.ticks[i].quote;
+  return m.last.quote;
 }
 
 function closeContract(c, reason) {
@@ -96,11 +144,10 @@ function closeContract(c, reason) {
   state.open.splice(i, 1);
   let pl = contractPL(c);
   if (c.type === 'multipliers') pl = Math.max(pl, -c.stake);
-  if (c.type === 'risefall') {
-    const exit = feed.markets[c.market].last.quote;
-    const win = c.dir === 'up' ? exit > c.entry : exit < c.entry;
-    pl = win ? r2(c.stake * RISE_FALL_PAYOUT - c.stake) : -c.stake;
-    c.exit = exit;
+  if (isBinary(c.type)) {
+    const m = feed.markets[c.market];
+    c.exit = quoteAt(m, Math.min(c.expiryEpoch, m.last.epoch));
+    pl = binaryResult(c, c.exit);
   }
   c.pl = pl;
   c.closedAt = Date.now();
@@ -112,8 +159,9 @@ function closeContract(c, reason) {
   render();
 }
 
-const dirName = (type, dir) => (type === 'risefall' ? (dir === 'up' ? 'Rise' : 'Fall') : dir === 'up' ? 'Up' : 'Down');
-const contractName = (c) => `${TRADE_TYPES[c.type]} ${dirName(c.type, c.dir)}`;
+const dirName = (type, dir) => (dir === 'up' ? 'Up' : 'Down');
+const contractDir = (c) => (isBinary(c.type) ? (c.dir === 'up' ? 'Up / Call' : 'Down / Put') : dirName(c.type, c.dir));
+const contractName = (c) => `${TRADE_TYPES[c.type]} ${contractDir(c)}`;
 
 function buy() {
   const stake = state.stake;
@@ -137,13 +185,17 @@ function buy() {
     c.tp = state.tp;
     c.sl = state.sl;
   } else {
-    c.duration = state.duration;
-    c.ticksLeft = state.duration;
+    const T = state.durations[c.type];
+    c.duration = T;
+    c.expiryEpoch = c.entryEpoch + T;
+    c.strike = c.type === 'digital' ? m.round(c.entry + state.strike * strikeStep(m, T)) : c.entry;
+    c.rate = profitRate(c.type, c.dir, state.strike);
+    c.payout = r2(stake * (1 + c.rate));
   }
   state.balance = r2(state.balance - stake);
   state.open.unshift(c);
   save();
-  toast(`Stake: ${eur(stake)}`, `${contractName(c)} - ${def(c.market).name}`);
+  toast(`Stake: ${eur(stake)}`, `${contractName(c)} - ${def(c.market).name}${c.duration ? ` · ${fmtDur(c.duration)}` : ''}`);
   const box = $('#sym-box');
   box.classList.add('flash');
   requestAnimationFrame(() => requestAnimationFrame(() => box.classList.remove('flash')));
@@ -157,9 +209,8 @@ feed.addEventListener('tick', () => {
       if (pl <= -c.stake) closeContract(c, 'stop out');
       else if (c.tp != null && pl >= c.tp) closeContract(c, 'take profit');
       else if (c.sl != null && pl <= -c.sl) closeContract(c, 'stop loss');
-    } else {
-      c.ticksLeft--;
-      if (c.ticksLeft <= 0) closeContract(c);
+    } else if (feed.markets[c.market].last.epoch >= c.expiryEpoch) {
+      closeContract(c, 'expired');
     }
   }
   renderLive();
@@ -315,8 +366,29 @@ function riskSheet() {
 }
 
 function durationSheet() {
+  const type = state.tradeType;
   openSheet('Duration', (body, close) => {
-    body.append(chips([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => [n, `${n} tick${n > 1 ? 's' : ''}`]), state.duration, (v) => ((state.duration = v), render(), close())));
+    body.append(
+      chips(DURATIONS[type].map((n) => [n, fmtDur(n)]), state.durations[type], (v) => ((state.durations[type] = v), render(), close()), DURATIONS[type].length === 4 ? 4 : 3),
+    );
+    body.append(el('div', 'hint', type === 'turbo' ? 'Turbo: very short contracts, from 30 seconds to 5 minutes.' : 'The result is decided by the price at the exact second of expiry.'));
+  });
+}
+
+function strikeSheet() {
+  const m = market();
+  const step = strikeStep(m, state.durations.digital);
+  openSheet('Strike price', (body, close) => {
+    body.append(
+      chips(
+        STRIKES.map((k) => [k, `${k > 0 ? '+' : ''}${(k * step).toFixed(m.decimals)}`]),
+        state.strike,
+        (v) => ((state.strike = v), render(), close()),
+        4,
+      ),
+    );
+    const rows = STRIKES.map((k) => `${k > 0 ? '+' : ''}${(k * step).toFixed(m.decimals)}: Up ${Math.round(profitRate('digital', 'up', k) * 100)}% · Down ${Math.round(profitRate('digital', 'down', k) * 100)}%`);
+    body.append(el('div', 'hint', `Distance from the current price. The further the strike is against you, the higher the payout.<br>${rows.join('<br>')}`));
   });
 }
 
@@ -373,6 +445,7 @@ function setCard(n, label, value, onClick) {
   c.onclick = onClick;
 }
 
+const buyBtn = $('#buy-btn');
 function render() {
   phone.dataset.view = state.view;
   navIcons();
@@ -392,10 +465,22 @@ function render() {
     const risk = [state.tp != null ? `TP ${euroShort(state.tp)}` : null, state.sl != null ? `SL ${euroShort(state.sl)}` : null].filter(Boolean).join(' · ');
     setCard(3, 'Risk management', risk || '-', riskSheet);
   } else {
-    setCard(1, 'Duration', `${state.duration} tick${state.duration > 1 ? 's' : ''}`, durationSheet);
-    setCard(2, 'Stake', euroShort(state.stake), stakeSheet);
-    setCard(3, 'Payout', euroShort(r2(state.stake * RISE_FALL_PAYOUT)), stakeSheet);
+    const type = state.tradeType;
+    const rate = profitRate(type, state.dir, state.strike);
+    const payout = r2(state.stake * (1 + rate));
+    setCard(1, 'Duration', fmtDur(state.durations[type]), durationSheet);
+    if (type === 'digital') {
+      const m = market();
+      const off = state.strike * strikeStep(m, state.durations.digital);
+      setCard(2, 'Strike', state.strike ? `${off > 0 ? '+' : ''}${off.toFixed(m.decimals)}` : 'Spot', strikeSheet);
+      setCard(3, 'Stake', euroShort(state.stake), stakeSheet);
+    } else {
+      setCard(2, 'Stake', euroShort(state.stake), stakeSheet);
+      setCard(3, 'Payout', `${euroShort(payout)}`, stakeSheet);
+    }
+    buyBtn.textContent = `Buy · +${Math.round(rate * 100)}%`;
   }
+  if (!isBinary(state.tradeType)) buyBtn.textContent = 'Buy';
 
   $('#interval-tag').textContent = state.chartMode === 'tick' ? '1t' : state.chartMode === 60 ? '1m' : '5m';
   $('#expand-btn').innerHTML = phone.classList.contains('fs') ? icons.collapse : icons.expand;
@@ -414,10 +499,12 @@ function positionCard(c, live) {
   const card = el('div', 'pos-card');
   card.dataset.id = c.id;
   const extra = live
-    ? c.type === 'risefall'
-      ? `${c.ticksLeft} tick${c.ticksLeft === 1 ? '' : 's'} remaining`
+    ? isBinary(c.type)
+      ? binaryInfo(c)
       : `x${c.mult} · Entry ${c.entry.toFixed(d.decimals)}`
-    : `${c.reason ? `${c.reason[0].toUpperCase()}${c.reason.slice(1)} · ` : ''}Entry ${c.entry.toFixed(d.decimals)}`;
+    : isBinary(c.type)
+      ? `Strike ${c.strike.toFixed(d.decimals)} · Exit ${c.exit.toFixed(d.decimals)}`
+      : `${c.reason ? `${c.reason[0].toUpperCase()}${c.reason.slice(1)} · ` : ''}Entry ${c.entry.toFixed(d.decimals)}`;
   card.innerHTML = `
     <span class="sym-ico">${symbolIcon(d.badge)}</span>
     <div class="pos-main"><span>${d.name}</span><span class="t2">${contractName(c)}</span><span class="t3">${extra}</span></div>
@@ -444,6 +531,11 @@ function positionCard(c, live) {
   return card;
 }
 
+function binaryInfo(c) {
+  const left = Math.max(0, c.expiryEpoch - feed.markets[c.market].last.epoch);
+  return `Expires in ${fmtClock(left)} · Strike ${c.strike.toFixed(def(c.market).decimals)} · Payout ${num(c.payout)}`;
+}
+
 function renderPositions() {
   const list = $('#pos-list');
   const open = state.posTab === 'open';
@@ -455,7 +547,14 @@ function renderPositions() {
 // Atualizações a cada tick (sem reconstruir o DOM).
 function renderLive() {
   const openHere = state.open.filter((c) => c.market === state.market);
-  chart?.setContracts(openHere.map((c) => ({ entry: c.entry, entryEpoch: c.entryEpoch, dir: c.dir })));
+  chart?.setContracts(openHere.map((c) => ({ entry: c.entry, entryEpoch: c.entryEpoch, dir: c.dir, strike: c.strike, expiryEpoch: c.expiryEpoch })));
+  const timed = state.open.filter((c) => isBinary(c.type));
+  const exp = $('#expiry-pill');
+  exp.hidden = timed.length === 0;
+  if (timed.length) {
+    const next = Math.min(...timed.map((c) => c.expiryEpoch - feed.markets[c.market].last.epoch));
+    $('#expiry-time').textContent = fmtClock(Math.max(0, next));
+  }
 
   const pill = $('#pl-pill');
   pill.hidden = state.open.length === 0;
@@ -480,7 +579,7 @@ function renderLive() {
       p.classList.toggle('pos', pl >= 0);
       const btn = $('[data-close-btn]', card);
       if (btn) btn.textContent = `Close ${euroSym(pl, true)}`;
-      if (c.type === 'risefall') $('.t3', card).textContent = `${c.ticksLeft} tick${c.ticksLeft === 1 ? '' : 's'} remaining`;
+      if (isBinary(c.type)) $('.t3', card).textContent = binaryInfo(c);
     }
   }
 }

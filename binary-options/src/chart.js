@@ -195,8 +195,8 @@ export class Chart {
     }
 
     for (const c of this.contracts) {
-      lo = Math.min(lo, c.entry);
-      hi = Math.max(hi, c.entry);
+      lo = Math.min(lo, c.entry, c.strike ?? c.entry);
+      hi = Math.max(hi, c.entry, c.strike ?? c.entry);
     }
 
     // ---- Escala Y suavizada ----
@@ -279,6 +279,25 @@ export class Chart {
         mk.circle(xe, plotB - 12, 8).stroke({ width: 2, color });
         mk.moveTo(xe, plotB - 12).lineTo(xe, plotB - 16).stroke({ width: 2, color, cap: 'round' });
         mk.moveTo(xe - 3, plotB - 22.5).lineTo(xe + 3, plotB - 22.5).stroke({ width: 2, color, cap: 'round' });
+      }
+      // Strike diferente da entrada (opções digitais): barreira tracejada em toda a largura.
+      if (c.strike != null && c.strike !== c.entry) {
+        const ys = yOf(c.strike);
+        dashed(mk, PLOT_LEFT, ys, plotR, ys, 8, 5);
+        mk.stroke({ width: 1.5, color, alpha: 0.9 });
+      }
+      // Linha de vencimento com bandeira, quando está dentro da janela visível.
+      if (c.expiryEpoch) {
+        const xx = xOf(c.expiryEpoch);
+        if (xx > PLOT_LEFT && xx < plotR) {
+          dashed(mk, xx, plotT + 10, xx, plotB);
+          mk.stroke({ width: 1.5, color: COLORS.line });
+          mk.moveTo(xx, plotT + 10).lineTo(xx, plotT + 30).stroke({ width: 2, color: COLORS.line });
+          for (let i = 0; i < 3; i++)
+            for (let j = 0; j < 2; j++)
+              mk.rect(xx + i * 5, plotT + 10 + j * 5, 5, 5).fill((i + j) % 2 ? 0xffffff : COLORS.line);
+          mk.rect(xx, plotT + 10, 15, 10).stroke({ width: 1, color: COLORS.line });
+        }
       }
       mk.circle(cx, ye, 19).fill(0xffffff).stroke({ width: 2.5, color });
       mk.circle(cx, ye, 14.5).fill(color);
