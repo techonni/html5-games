@@ -157,7 +157,7 @@ async function initStage() {
   drawUser(4.5, 8.5, 3.4, 8, 0x7f95aa);
   drawUser(23.5, 8.5, 3.4, 8, 0x7f95aa);
   drawUser(14, 5.5, 4.8, 14, 0x9fb3c6);
-  usersIco.scale.set(0.62); usersIco.position.set(33, 342);
+  usersIco.scale.set(0.8); usersIco.position.set(31, 340);
   const usersTxt = new Text({ text: '', style: { fontFamily: 'Figtree', fontWeight: '600', fontSize: 20, fill: 0xffffff } });
   usersTxt.position.set(57, 337);
   const net = new Text({ text: 'Network Status', style: { fontFamily: 'Figtree', fontWeight: '500', fontSize: 19, fill: 0x8fa3b8 } });
