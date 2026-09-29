@@ -18,6 +18,7 @@ const GRID_DOT_RADIUS = 1.2; // raio (px) de cada ponto da grelha
 const FLAME_BASE_LENGTH = 10; // comprimento base da chama do foguetão
 const FLAME_WAVE_AMPLITUDE = 3; // oscilação suave e periódica da chama
 const FLAME_JITTER_AMPLITUDE = 4; // tremeluzir aleatório sobreposto à onda
+const REFUND_MULTIPLIER = 1; // devolve o montante apostado, sem ganho nem perda
 
 const multAt = (ms) => Math.exp(K * ms);
 const msFor = (m) => Math.log(m) / K;
@@ -220,7 +221,7 @@ export default {
       if (!round || round.phase !== 'countdown') return;
       const r = round;
       round = null;
-      wallet.settle('Crash', r.amount, 1); // devolve o montante apostado, sem ganho nem perda
+      wallet.settle('Crash', r.amount, REFUND_MULTIPLIER);
       setButton();
     };
 
