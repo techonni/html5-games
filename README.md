@@ -107,3 +107,13 @@ Recriação do simulador de opções binárias feita **só com PixiJS v8 + GSAP 
 - Índices sintéticos Volatility 10–100 (1s) gerados no browser; **Binary** (1–15 min, +85%) e **Turbo** (30 s–5 min, +80%) decididos pela cotação no segundo exato do vencimento (empate devolve a aposta).
 - Posições abertas (ao vivo, a ganhar/perder) e fechadas, lista de mercados com minigráficos, menu com som e reposição do saldo.
 - GSAP para as transições (folhas inferiores, seletores, cotação, separadores) e Howler.js para os sons sintetizados (clique, compra, ganho, perda, empate, bip dos últimos 3 s). Setas ↑/↓ e Enter no teclado.
+
+## Site zunrel.com (`zunrel-games/`)
+
+Site completo da zunrel, **desenhado só com PixiJS + GSAP + TypeScript + Howler.js** (um único canvas, tema "UI Design Rules – HTML5 Games"), com os dois jogos embutidos:
+
+- Cabeçalho com marca, navegação (Início · Crash · Binary · Sobre), som e "Jogar agora" no computador; menu lateral no telemóvel.
+- Página inicial com destaque animado, cartões dos jogos com miniaturas ao vivo, vantagens e rodapé; página Sobre.
+- `#/crash` e `#/binary` abrem os jogos dentro do site (cenas Pixi com layout próprio para computador e telemóvel). O Binary continua a correr em segundo plano para liquidar contratos a tempo.
+- `npm run dev:zunrel` para desenvolver, `npm run build:zunrel` gera `dist-zunrel/`.
+- Cloudflare: `wrangler.jsonc` publica `dist-zunrel/` como Worker com ficheiros estáticos (build `npm run build:zunrel`, deploy `npx wrangler deploy`).
