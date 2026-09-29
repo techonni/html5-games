@@ -42,3 +42,12 @@ Para adicionar um jogo, cria `src/games/<nome>.js` com `mount(ctx)` (usa `ctx.cr
 O workflow `.github/workflows/deploy.yml` publica o build no GitHub Pages a cada push para `main` (ativa em *Settings → Pages → Source: GitHub Actions*).
 
 As skills PixiJS para agentes estão em `.claude/skills/` (instaladas com `npx skills add https://github.com/pixijs/pixijs-skills`).
+
+## Pixelune Trader (`binary-options/`)
+
+Simulador mobile de negociação demo em PixiJS, publicado em `/binary-options/`:
+
+- Gráfico PixiJS com ticks (linha com gradiente) ou velas de 1m/5m, preço atual e marcadores de entrada.
+- Índices sintéticos Volatility 10–100 (1s) gerados no browser (1 tick por segundo).
+- **Multipliers** (Up/Down, x1–x300, take profit/stop loss, stop out) e **Rise/Fall** (1–10 ticks, pagamento 95%).
+- Separadores Trade / Positions (abertas e fechadas), modo de ecrã inteiro e saldo demo de 10 000 EUR.
