@@ -77,6 +77,12 @@ Jogo mobile em **flat design** de colecionar e alimentar monstros, publicado em 
 - Coleção com silhuetas dos monstros por descobrir e troca do monstro ativo.
 - Componentes flat estilo "tátil": botões com degrau sólido, tiles com contorno de 2px, barras de progresso arredondadas. Tudo guardado no browser.
 
-## Stake Crash (`stake-crash/`)
+## Zunrel Crash (`stake-crash/`)
 
-Réplica mobile-first (largura de design 462 px, escalada por `zoom`) do Crash dos Stake Originals em PixiJS v8: histórico de multiplicadores, foguetão/curva animados, contagem "Starting in", estados Crashed/Cashout, Amount ½/2×, Cashout At, Net Gain on Win, modo Manual/Auto, painel de jogadores e separadores Description/Game Statistics. Créditos demo, sem dinheiro real. Publicado em `/stake-crash/`.
+Crash gratuito em PixiJS v8 + Bootstrap 5.3.8, responsivo (mobile, tablet e desktop; em desktop os controlos ficam à esquerda e o palco à direita), interface em francês. Créditos fictícios (1 000 G), sem dinheiro real.
+
+- Jogo completo: apostas manuais e automáticas, retirada manual ou automática, ½ / 2×, atalho Espaço, histórico, estatísticas, definições (sons, animações, notificações).
+- Equidade verificável: hash SHA-256 publicado antes de cada ronda, semente revelada no fim e verificador na janela "Équité".
+- Conta demo (Connexion / Inscription) guardada em localStorage, chat simulado, Parcourir / Pour vous, sauvegardar e seguir.
+
+Publicado em `/stake-crash/`.
