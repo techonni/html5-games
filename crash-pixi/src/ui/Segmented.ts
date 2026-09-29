@@ -2,6 +2,7 @@ import { Container, Graphics, Rectangle, type Text } from 'pixi.js';
 import gsap from 'gsap';
 import { C } from '../theme';
 import { makeText } from '../text';
+import { sound } from '../audio/Sound';
 
 /** Seletor de 2+ opções em pílula, com indicador deslizante (GSAP). */
 export class Segmented extends Container {
@@ -54,6 +55,7 @@ export class Segmented extends Container {
   select(i: number): void {
     if (this.locked || i === this.index) return;
     this.index = i;
+    sound.play('click');
     const segW = (this.w - 10) / this.labels.length;
     gsap.to(this.knob, { x: 5 + i * segW, duration: 0.3, ease: 'power3.out' });
     this.labels.forEach((t, j) => gsap.to(t, { alpha: j === i ? 1 : 0.65, duration: 0.2 }));

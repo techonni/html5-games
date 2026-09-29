@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { C, R } from '../theme';
 import { makeText } from '../text';
 import { chevron, coinIcon } from '../icons';
+import { sound } from '../audio/Sound';
 
 export interface FieldAddon {
   label?: string;
@@ -59,7 +60,9 @@ export class Field extends Container {
       this.hit.eventMode = 'static';
       this.hit.cursor = 'text';
       this.hit.on('pointertap', () => {
-        if (!this.locked) this.onFocus?.();
+        if (this.locked) return;
+        sound.play('click', 0.6);
+        this.onFocus?.();
       });
     }
 
@@ -80,7 +83,9 @@ export class Field extends Container {
         if (!this.locked) gsap.fromTo(bg, { alpha: 0.25 }, { alpha: 0, duration: 0.3 });
       });
       view.on('pointertap', () => {
-        if (!this.locked) opt.onTap();
+        if (this.locked) return;
+        sound.play('click');
+        opt.onTap();
       });
       this.shaker.addChild(view);
       this.addons.push({ opt, view, bg });
