@@ -81,6 +81,8 @@
           <button type="button" class="mode on" data-mode="manual" role="tab" aria-selected="true" data-i18n="manual">Manuel</button>
           <button type="button" class="mode" data-mode="auto" role="tab" aria-selected="false" data-i18n="auto">Auto</button>
         </div>
+
+        <button type="button" class="btn-play" id="play-btn" data-i18n="play">Jouer</button>
       </section>
 
       <div class="tools">
@@ -146,32 +148,34 @@
         </div>
         <div class="foryou-cards" id="foryou-cards">
           <button type="button" class="fy-card" data-game="mines">
-            <div class="fy-thumb fy-mines" aria-hidden="true"></div>
+            <div class="fy-thumb fy-mines" aria-hidden="true">
+              <span class="fy-grid-preview"></span>
+            </div>
             <div class="fy-meta">
               <b>Mines</b>
-              <span data-i18n="minesTag">Grelha 5×5</span>
+              <span data-i18n="minesTag">5×5 · Original</span>
             </div>
           </button>
           <button type="button" class="fy-card" data-game="scarab">
-            <div class="fy-thumb fy-scarab" aria-hidden="true"></div>
+            <div class="fy-thumb fy-scarab" aria-hidden="true">
+              <span class="fy-badge">EG</span>
+            </div>
             <div class="fy-meta">
               <b>Scarab Spin</b>
-              <span data-i18n="scarabTag">Slots 5×3</span>
+              <span data-i18n="scarabTag">Slots · 20 lignes</span>
             </div>
           </button>
           <button type="button" class="fy-card" data-game="samurai">
-            <div class="fy-thumb fy-samurai" aria-hidden="true"></div>
+            <div class="fy-thumb fy-samurai" aria-hidden="true">
+              <span class="fy-badge">JP</span>
+            </div>
             <div class="fy-meta">
               <b>Blue Samurai</b>
-              <span data-i18n="samuraiTag">Slots 40 lignes</span>
+              <span data-i18n="samuraiTag">Slots · 40 lignes</span>
             </div>
           </button>
         </div>
       </section>
-
-      <div class="play-dock">
-        <button type="button" class="btn-play" id="play-btn" data-i18n="play">Jouer</button>
-      </div>
 
       <nav class="bottom-nav" aria-label="Main">
         <button type="button" class="nav-item" data-nav="browse">

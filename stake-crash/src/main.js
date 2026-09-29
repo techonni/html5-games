@@ -553,9 +553,8 @@ async function openGame(id) {
 
 function closeGame() {
   forYou.close();
-  els.gameOverlay.hidden = true;
-  els.gameStage.replaceChildren();
   els.gameControls.replaceChildren();
+  els.gameOverlay.hidden = true;
 }
 
 function bindUI() {

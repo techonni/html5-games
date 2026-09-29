@@ -78,7 +78,7 @@ button {
   position: relative;
   overflow-x: hidden;
   overflow-y: auto;
-  padding-bottom: calc(var(--nav-h) + var(--play-h) + var(--safe-b) + 12px);
+  padding-bottom: calc(var(--nav-h) + var(--safe-b) + 16px);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
@@ -153,13 +153,14 @@ button {
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  min-width: 168px;
+  min-width: 172px;
   justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .hdr-balance .coin-c.sm {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   font-size: 12px;
 }
 
@@ -455,22 +456,10 @@ button {
   gap: 10px;
 }
 
-.play-dock {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: calc(var(--nav-h) + var(--safe-b));
-  width: 100%;
-  max-width: var(--phone-w);
-  padding: 8px 12px;
-  background: linear-gradient(180deg, rgba(15, 33, 46, 0), var(--bg) 28%);
-  z-index: 28;
-  box-sizing: border-box;
-}
-
 .btn-play {
   width: 100%;
   height: 52px;
+  margin-top: 4px;
   border-radius: var(--radius);
   background: var(--blue);
   color: #fff;
@@ -1091,12 +1080,12 @@ button {
   width: 100%;
   max-width: var(--phone-w);
   height: calc(var(--nav-h) + var(--safe-b));
-  padding: 8px 0 var(--safe-b);
+  padding: 0 0 var(--safe-b);
   background: #1a2c38;
   border-top: 1px solid rgba(47, 69, 83, 0.6);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  align-items: center;
+  align-items: stretch;
   z-index: 30;
 }
 
@@ -1105,13 +1094,19 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  height: 48px;
+  gap: 5px;
+  height: var(--nav-h);
   color: var(--muted-2);
   font-size: 11px;
   font-weight: 600;
   position: relative;
   line-height: 1;
+  padding-top: 2px;
+}
+
+.nav-item svg {
+  display: block;
+  flex-shrink: 0;
 }
 
 .nav-item.active {
@@ -1132,7 +1127,7 @@ button {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(var(--nav-h) + var(--play-h) + var(--safe-b) + 12px);
+  bottom: calc(var(--nav-h) + var(--safe-b) + 12px);
   transform: translateX(-50%);
   z-index: 50;
   max-width: min(360px, calc(100vw - 24px));
@@ -1268,10 +1263,6 @@ button {
     bottom: 24px;
     border-radius: 0 0 16px 16px;
   }
-  .play-dock {
-    bottom: calc(24px + var(--nav-h));
-    border-radius: 0;
-  }
   .pnl-notice {
     top: calc(36px + env(safe-area-inset-top, 0px));
   }
@@ -1324,58 +1315,91 @@ button {
   background: #213743;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(47, 69, 83, 0.8);
+  border: 1px solid rgba(47, 69, 83, 0.9);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.fy-grid-preview {
+  position: absolute;
+  inset: 16%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.fy-grid-preview::before,
+.fy-grid-preview::after {
+  content: "";
+  grid-column: 1 / -1;
+  display: contents;
 }
 
 .fy-mines {
-  background:
-    linear-gradient(135deg, #1a2c38 0%, #2f4553 100%);
+  background: #1a2c38;
 }
 
-.fy-mines::before,
-.fy-mines::after {
-  content: "";
-  position: absolute;
-  inset: 18%;
+.fy-mines .fy-grid-preview {
   background:
-    repeating-linear-gradient(0deg, #1475e1 0 22%, transparent 22% 33%),
-    repeating-linear-gradient(90deg, #1475e1 0 22%, transparent 22% 33%);
-  opacity: 0.35;
-  border-radius: 6px;
+    linear-gradient(#2f4553 0 0) 0 0 / 30% 30%,
+    linear-gradient(#2f4553 0 0) 50% 0 / 30% 30%,
+    linear-gradient(#2f4553 0 0) 100% 0 / 30% 30%,
+    linear-gradient(#2f4553 0 0) 0 50% / 30% 30%,
+    linear-gradient(#1475e1 0 0) 50% 50% / 30% 30%,
+    linear-gradient(#2f4553 0 0) 100% 50% / 30% 30%,
+    linear-gradient(#2f4553 0 0) 0 100% / 30% 30%,
+    linear-gradient(#2f4553 0 0) 50% 100% / 30% 30%,
+    linear-gradient(#2f4553 0 0) 100% 100% / 30% 30%;
+  background-repeat: no-repeat;
+  border-radius: 4px;
 }
 
 .fy-scarab {
-  background: linear-gradient(160deg, #3a2a12 0%, #1a2c38 55%, #213743 100%);
+  background: radial-gradient(circle at 50% 42%, #5a3d12 0%, #1a2c38 62%, #0f212e 100%);
 }
 
 .fy-scarab::before {
   content: "";
   position: absolute;
   left: 50%;
-  top: 48%;
-  width: 42%;
-  height: 52%;
+  top: 46%;
+  width: 38%;
+  height: 48%;
   transform: translate(-50%, -50%);
-  border-radius: 50% 50% 45% 45%;
-  background: #ffbf00;
-  box-shadow: 0 0 0 3px rgba(255, 191, 0, 0.25);
+  border-radius: 50% 50% 46% 46%;
+  background: linear-gradient(180deg, #ffd24a, #ffbf00 55%, #c99200);
+  box-shadow: 0 0 0 3px rgba(255, 191, 0, 0.22);
 }
 
 .fy-samurai {
-  background: linear-gradient(160deg, #0d2740 0%, #1475e1 45%, #0f212e 100%);
+  background: linear-gradient(165deg, #0a2238 0%, #1475e1 48%, #0f212e 100%);
 }
 
 .fy-samurai::before {
   content: "";
   position: absolute;
   left: 50%;
-  top: 42%;
-  width: 48%;
-  height: 36%;
-  transform: translate(-50%, -50%);
-  border-radius: 10px 10px 14px 14px;
-  background: #1a82f0;
-  box-shadow: 0 -10px 0 -2px #ffbf00;
+  top: 50%;
+  width: 54%;
+  height: 40%;
+  transform: translate(-50%, -42%);
+  border-radius: 12px 12px 16px 16px;
+  background: linear-gradient(180deg, #3d9bff, #1475e1);
+  box-shadow: 0 -12px 0 -4px #ffbf00;
+}
+
+.fy-badge {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 18px;
+  letter-spacing: 0.04em;
 }
 
 .fy-meta {
@@ -1451,9 +1475,9 @@ button {
 }
 
 .game-stage {
-  flex: 1;
-  min-height: 280px;
-  background: #0b1a24;
+  flex: 1 1 auto;
+  min-height: 320px;
+  background: #0f212e;
 }
 
 .game-stage canvas {
@@ -1466,25 +1490,64 @@ button {
   padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   background: var(--bg-elev);
   border-top: 1px solid var(--line);
 }
 
-.fy-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.sg-play {
+  width: 100%;
+  height: 52px;
+  border-radius: var(--radius);
+  background: var(--blue) !important;
+  color: #ffffff !important;
+  font-size: 16px;
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(20, 117, 225, 0.28);
 }
 
-.fy-label {
+.sg-play:disabled {
+  opacity: 0.5;
+}
+
+.sg-secondary {
+  width: 100%;
+  height: 44px;
+  border-radius: var(--radius);
+  background: var(--muted-btn);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sg-secondary:disabled {
+  opacity: 0.45;
+}
+
+.sg-cash {
+  width: 100%;
+  height: 48px;
+  border-radius: var(--radius);
+  background: var(--green);
+  color: #0b1a12;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.sg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sg-label {
   font-size: 12px;
   color: var(--muted);
   font-weight: 700;
 }
 
-.fy-input,
-.fy-select {
+.sg-input {
+  width: 100%;
   height: 44px;
   border-radius: var(--radius);
   background: var(--input);
@@ -1495,31 +1558,64 @@ button {
   color: var(--text);
 }
 
-.fy-btn {
-  height: 48px;
-  border-radius: var(--radius);
-  background: var(--blue);
-  color: #fff;
-  font-weight: 800;
-  font-size: 15px;
+.sg-amount-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
 }
 
-.fy-btn.ghost {
+.sg-input-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sg-input-box .sg-input {
+  padding-right: 36px;
+}
+
+.sg-coin {
+  position: absolute;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #3a2a00;
+  font-size: 11px;
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+}
+
+.sg-segs {
+  display: flex;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--input);
+}
+
+.sg-chip {
+  width: 48px;
+  height: 44px;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--muted);
+  border-right: 1px solid var(--input-border);
+}
+
+.sg-chip:last-child {
+  border-right: 0;
+}
+
+.sg-chip:active {
   background: var(--muted-btn);
   color: var(--text);
 }
 
-.fy-btn.cash {
-  background: var(--green);
-  color: #0f212e;
-}
-
-.fy-btn:disabled {
-  opacity: 0.45;
-}
-
-.fy-lines {
-  font-size: 12px;
-  color: var(--muted-2);
-  font-weight: 700;
+.sg-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
