@@ -1,11 +1,13 @@
 import './style.css';
 import { createChart, multAt, msFor } from './chart.js';
-import { crashPoint, randInt } from './rng.js';
+import { crashPoint } from './rng.js';
 import { t } from './i18n.js';
+import { createForYouGames } from './foryou-games.js';
 
 const WAIT_MS = 5000;
 const CRASH_HOLD_MS = 2800;
-const STORAGE_KEY = 'zunrel-crash-demo-v2';
+const AUTO_TARGET = 2;
+const STORAGE_KEY = 'zunrel-crash-demo-v3';
 
 const $ = (id) => document.getElementById(id);
 
@@ -14,24 +16,23 @@ const els = {
   countdownPill: $('countdown-pill'),
   countdownVal: $('countdown-val'),
   crashedPill: $('crashed-pill'),
-  playersCount: $('players-count'),
-  livePlayers: $('live-players'),
   playBtn: $('play-btn'),
   amountInput: $('amount-input'),
-  cashoutInput: $('cashout-input'),
   netGain: $('net-gain'),
+  resultLabel: $('result-label'),
   balance: $('balance'),
   balanceBtn: $('balance-btn'),
   halfBtn: $('half-btn'),
   doubleBtn: $('double-btn'),
-  cashoutDown: $('cashout-down'),
-  cashoutUp: $('cashout-up'),
   toast: $('toast'),
   pnlNotice: $('pnl-notice'),
   pnlAmount: $('pnl-amount'),
   pnlIcon: $('pnl-icon'),
+  pnlLabel: $('pnl-label'),
   menuBtn: $('menu-btn'),
-  topMenu: $('top-menu'),
+  drawerRoot: $('drawer-root'),
+  drawerBackdrop: $('drawer-backdrop'),
+  drawerClose: $('drawer-close'),
   signinBtn: $('signin-btn'),
   registerBtn: $('register-btn'),
   fairnessBtn: $('fairness-btn'),
@@ -39,15 +40,20 @@ const els = {
   statsBtn: $('stats-btn'),
   heartBtn: $('heart-btn'),
   saveBtn: $('save-btn'),
-  chatBox: $('chat-box'),
-  chatForm: $('chat-form'),
-  chatInput: $('chat-input'),
   statsList: $('stats-list'),
   modalRoot: $('modal-root'),
   modalBackdrop: $('modal-backdrop'),
   modalClose: $('modal-close'),
   modalTitle: $('modal-title'),
   modalBody: $('modal-body'),
+  foryouStrip: $('foryou-strip'),
+  gameOverlay: $('game-overlay'),
+  gameStage: $('game-stage'),
+  gameControls: $('game-controls'),
+  gameTitle: $('game-title'),
+  gameBack: $('game-back'),
+  gameBalance: $('game-balance'),
+  gameBalanceBtn: $('game-balance-btn'),
 };
 
 let lang = 'fr';
@@ -58,6 +64,7 @@ let chart = null;
 let favored = false;
 let user = null;
 let settings = { sound: true, animations: true, notifications: true };
+let lastResult = null; // { kind: 'gain'|'loss', amount }
 
 /** @type {'waiting'|'flying'|'crashed'} */
 let phase = 'waiting';
@@ -66,12 +73,21 @@ let flyStart = 0;
 let crashAt = 1;
 let crashHoldStart = 0;
 let bet = null;
-let playersOnline = 24;
-let playersInRound = 20;
+
+const forYou = createForYouGames({
+  getBalance: () => balance,
+  setBalance: (v) => {
+    balance = Math.round(v * 100) / 100;
+    updateBalanceUI();
+    save();
+  },
+  getLang: () => lang,
+  onToast: (msg, kind) => showToast(msg, kind),
+});
 
 function load() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('zunrel-crash-demo-v2');
     if (!raw) return;
     const data = JSON.parse(raw);
     if (typeof data.balance === 'number' && data.balance >= 0) balance = data.balance;
@@ -119,16 +135,15 @@ function showToast(msg, kind = '') {
   }, 2400);
 }
 
-/** Stake-style top smartphone banner: +amount (win) / -amount (lose) */
 function showPnl(amount, kind) {
   if (!els.pnlNotice) return;
   const abs = Math.abs(amount);
   const sign = kind === 'win' ? '+' : '−';
+  els.pnlLabel.textContent = t(lang, kind === 'win' ? 'gain' : 'loss');
   els.pnlAmount.textContent = `${sign}${fmtMoney(abs)}`;
   els.pnlIcon.textContent = kind === 'win' ? '↑' : '↓';
   els.pnlNotice.hidden = false;
   els.pnlNotice.classList.remove('show', 'win', 'lose');
-  // restart animation
   void els.pnlNotice.offsetWidth;
   els.pnlNotice.classList.add('show', kind);
   clearTimeout(showPnl._t);
@@ -143,9 +158,6 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n]').forEach((el) => {
     el.textContent = t(lang, el.dataset.i18n);
   });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
-    el.placeholder = t(lang, el.dataset.i18nPlaceholder);
-  });
   document.querySelectorAll('[data-i18n-aria]').forEach((el) => {
     el.setAttribute('aria-label', t(lang, el.dataset.i18nAria));
   });
@@ -154,7 +166,7 @@ function applyI18n() {
   });
   els.heartBtn.classList.toggle('on', favored);
   els.heartBtn.setAttribute('aria-pressed', favored ? 'true' : 'false');
-  updateNetGain();
+  updateResultField();
   updateBalanceUI();
   setPlayButton();
   renderStatsPanel();
@@ -169,20 +181,27 @@ function setLang(next) {
 
 function updateBalanceUI() {
   els.balance.textContent = fmtMoney(balance);
+  if (els.gameBalance) els.gameBalance.textContent = fmtMoney(balance);
 }
 
-function updateNetGain() {
-  const amount = parseNum(els.amountInput.value) || 0;
-  const target = parseNum(els.cashoutInput.value) || 0;
-  const net = amount > 0 && target >= 1.01 ? amount * target - amount : 0;
-  els.netGain.value = formatInput(Math.max(0, net));
-}
-
-function bumpPlayers() {
-  playersOnline = randInt(18, 42);
-  playersInRound = Math.min(playersOnline, randInt(Math.max(8, playersOnline - 10), playersOnline));
-  els.playersCount.textContent = `${playersInRound} / ${playersOnline}`;
-  els.livePlayers.textContent = String(playersOnline);
+function updateResultField() {
+  if (lastResult) {
+    els.resultLabel.textContent = t(lang, lastResult.kind === 'gain' ? 'gain' : 'loss');
+    els.netGain.value = formatInput(lastResult.amount);
+    els.resultLabel.classList.toggle('is-loss', lastResult.kind === 'loss');
+    els.resultLabel.classList.toggle('is-gain', lastResult.kind === 'gain');
+    return;
+  }
+  els.resultLabel.textContent = t(lang, 'gain');
+  els.resultLabel.classList.remove('is-loss', 'is-gain');
+  // Projected gain if flying with an active bet (manual cashout estimate at current mult)
+  if (phase === 'flying' && bet && !bet.queued && bet.cashed == null) {
+    const m = multAt(performance.now() - flyStart);
+    const net = Math.max(0, bet.amount * m - bet.amount);
+    els.netGain.value = formatInput(net);
+    return;
+  }
+  els.netGain.value = formatInput(0);
 }
 
 function setPlayButton() {
@@ -214,14 +233,10 @@ function setPlayButton() {
 
 function placeOrQueueBet() {
   const amount = Math.round((parseNum(els.amountInput.value) || 0) * 100) / 100;
-  const target = Math.round((parseNum(els.cashoutInput.value) || 0) * 100) / 100;
+  const target = mode === 'auto' ? AUTO_TARGET : Infinity;
 
   if (!(amount >= 0.01)) {
     showToast(t(lang, 'invalidAmount'), 'lose');
-    return;
-  }
-  if (!(target >= 1.01)) {
-    showToast(t(lang, 'invalidCashout'), 'lose');
     return;
   }
   if (amount > balance) {
@@ -233,6 +248,7 @@ function placeOrQueueBet() {
   updateBalanceUI();
   save();
 
+  lastResult = null;
   bet = { amount, target, queued: phase !== 'waiting', cashed: null };
 
   if (phase === 'waiting') {
@@ -240,6 +256,7 @@ function placeOrQueueBet() {
   } else {
     showToast(t(lang, 'betQueued'));
   }
+  updateResultField();
   setPlayButton();
 }
 
@@ -260,8 +277,11 @@ function cashOut(atMult) {
   const m = Math.floor(atMult * 100) / 100;
   bet.cashed = m;
   const payout = Math.round(bet.amount * m * 100) / 100;
+  const net = Math.round((payout - bet.amount) * 100) / 100;
   balance = Math.round((balance + payout) * 100) / 100;
+  lastResult = { kind: 'gain', amount: Math.max(0, net) };
   updateBalanceUI();
+  updateResultField();
   save();
   showPnl(payout, 'win');
   setPlayButton();
@@ -269,6 +289,8 @@ function cashOut(atMult) {
 
 function settleLoss() {
   if (!bet || bet.queued || bet.cashed != null) return;
+  lastResult = { kind: 'loss', amount: bet.amount };
+  updateResultField();
   showPnl(bet.amount, 'lose');
   bet.cashed = 0;
   save();
@@ -279,10 +301,10 @@ function startWaiting() {
   waitStart = performance.now();
   els.countdownPill.hidden = false;
   els.crashedPill.hidden = true;
-  bumpPlayers();
   if (bet?.queued) bet.queued = false;
   chart?.draw({ ms: 0, phase: 'waiting' });
   setPlayButton();
+  updateResultField();
 }
 
 function startFlying() {
@@ -291,7 +313,6 @@ function startFlying() {
   crashAt = crashPoint();
   els.countdownPill.hidden = true;
   els.crashedPill.hidden = true;
-  bumpPlayers();
   setPlayButton();
 }
 
@@ -316,6 +337,7 @@ function startCrashed() {
     phase: 'crashed',
   });
   setPlayButton();
+  updateResultField();
 }
 
 function tick() {
@@ -333,7 +355,7 @@ function tick() {
     const ms = now - flyStart;
     const m = multAt(ms);
 
-    if (bet && !bet.queued && bet.cashed == null && m >= bet.target && bet.target < crashAt) {
+    if (bet && !bet.queued && bet.cashed == null && Number.isFinite(bet.target) && m >= bet.target && bet.target < crashAt) {
       cashOut(bet.target);
     }
 
@@ -344,6 +366,7 @@ function tick() {
 
     chart?.draw({ ms, phase: 'flying' });
     setPlayButton();
+    updateResultField();
     return;
   }
 
@@ -366,8 +389,8 @@ function closeModal() {
   document.body.style.overflow = '';
 }
 
-function openAuth(mode) {
-  const isIn = mode === 'in';
+function openAuth(modeAuth) {
+  const isIn = modeAuth === 'in';
   openModal(
     t(lang, isIn ? 'authTitleIn' : 'authTitleUp'),
     `
@@ -390,7 +413,7 @@ function openAuth(mode) {
     user = { name };
     save();
     closeModal();
-    closeMenu();
+    closeDrawer();
     showToast(t(lang, 'authOk', { n: name }), 'win');
   });
 }
@@ -480,61 +503,68 @@ function openBalanceMenu() {
 }
 
 function openNavPanel(nav) {
-  const map = {
-    browse: ['browseTitle', 'browseBody'],
-    foryou: ['forYouTitle', 'forYouBody'],
-    casino: ['casinoTitle', 'casinoBody'],
-    chat: null,
-  };
-  if (nav === 'chat') {
-    document.querySelector('.info-tab[data-tab="chat"]')?.click();
-    document.getElementById('info-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (nav === 'foryou') {
+    els.foryouStrip?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     return;
   }
-  const keys = map[nav];
-  if (!keys) return;
+  if (nav === 'browse') {
+    openDrawer();
+    return;
+  }
   openModal(
-    t(lang, keys[0]),
-    `<p>${t(lang, keys[1])}</p><button type="button" class="btn-ghost" id="nav-close">${t(lang, 'close')}</button>`,
+    t(lang, 'casinoTitle'),
+    `<p>${t(lang, 'casinoBody')}</p><button type="button" class="btn-ghost" id="nav-close">${t(lang, 'close')}</button>`,
   );
   $('nav-close')?.addEventListener('click', closeModal);
 }
 
-function closeMenu() {
-  els.topMenu.hidden = true;
+/* ---------- Drawer (right → left) ---------- */
+function openDrawer() {
+  els.drawerRoot.hidden = false;
+  requestAnimationFrame(() => els.drawerRoot.classList.add('open'));
+  els.menuBtn.classList.add('open');
+  els.menuBtn.setAttribute('aria-expanded', 'true');
+}
+
+function closeDrawer() {
+  els.drawerRoot.classList.remove('open');
   els.menuBtn.classList.remove('open');
   els.menuBtn.setAttribute('aria-expanded', 'false');
+  setTimeout(() => {
+    if (!els.drawerRoot.classList.contains('open')) els.drawerRoot.hidden = true;
+  }, 220);
 }
 
-function toggleMenu() {
-  const open = els.topMenu.hidden;
-  els.topMenu.hidden = !open;
-  els.menuBtn.classList.toggle('open', open);
-  els.menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+function toggleDrawer() {
+  if (els.drawerRoot.hidden || !els.drawerRoot.classList.contains('open')) openDrawer();
+  else closeDrawer();
 }
 
-function seedChat() {
-  if (els.chatBox.children.length) return;
-  const bots = ['Alex', 'Mia', 'Noah'];
-  bots.forEach((name) => {
-    const line = document.createElement('div');
-    line.className = 'chat-line';
-    line.innerHTML = `<b>${name}</b> ${t(lang, 'chatJoined')}`;
-    els.chatBox.appendChild(line);
-  });
+/* ---------- For You games ---------- */
+const GAME_TITLES = { mines: 'Mines', scarab: 'Scarab Spin', samurai: 'Blue Samurai' };
+
+async function openGame(id) {
+  closeDrawer();
+  els.gameTitle.textContent = GAME_TITLES[id] || id;
+  els.gameOverlay.hidden = false;
+  updateBalanceUI();
+  await forYou.open(id, els.gameStage, els.gameControls, els.gameBalance);
+}
+
+function closeGame() {
+  forYou.close();
+  els.gameOverlay.hidden = true;
+  els.gameStage.replaceChildren();
+  els.gameControls.replaceChildren();
 }
 
 function bindUI() {
   els.menuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    toggleMenu();
+    toggleDrawer();
   });
-
-  document.addEventListener('click', (e) => {
-    if (!els.topMenu.hidden && !els.topMenu.contains(e.target) && e.target !== els.menuBtn) {
-      closeMenu();
-    }
-  });
+  els.drawerBackdrop.addEventListener('click', closeDrawer);
+  els.drawerClose.addEventListener('click', closeDrawer);
 
   document.querySelectorAll('.lang-btn').forEach((btn) => {
     btn.addEventListener('click', (e) => {
@@ -558,36 +588,15 @@ function bindUI() {
   els.halfBtn.addEventListener('click', () => {
     const v = (parseNum(els.amountInput.value) || 0) / 2;
     els.amountInput.value = formatInput(Math.max(0.01, Math.floor(v * 100) / 100));
-    updateNetGain();
   });
 
   els.doubleBtn.addEventListener('click', () => {
     const v = (parseNum(els.amountInput.value) || 0) * 2;
     els.amountInput.value = formatInput(Math.min(balance, Math.round(v * 100) / 100));
-    updateNetGain();
   });
 
-  els.cashoutDown.addEventListener('click', () => {
-    const v = Math.max(1.01, (parseNum(els.cashoutInput.value) || 2) - 0.1);
-    els.cashoutInput.value = formatInput(Math.round(v * 100) / 100);
-    updateNetGain();
-  });
-
-  els.cashoutUp.addEventListener('click', () => {
-    const v = (parseNum(els.cashoutInput.value) || 2) + 0.1;
-    els.cashoutInput.value = formatInput(Math.round(v * 100) / 100);
-    updateNetGain();
-  });
-
-  els.amountInput.addEventListener('input', updateNetGain);
-  els.cashoutInput.addEventListener('input', updateNetGain);
   els.amountInput.addEventListener('blur', () => {
     els.amountInput.value = formatInput(Math.max(0, parseNum(els.amountInput.value) || 0));
-    updateNetGain();
-  });
-  els.cashoutInput.addEventListener('blur', () => {
-    els.cashoutInput.value = formatInput(Math.max(1.01, parseNum(els.cashoutInput.value) || 1.01));
-    updateNetGain();
   });
 
   document.querySelectorAll('.mode').forEach((btn) => {
@@ -603,11 +612,28 @@ function bindUI() {
   });
 
   els.balanceBtn.addEventListener('click', openBalanceMenu);
+  els.gameBalanceBtn?.addEventListener('click', openBalanceMenu);
   els.signinBtn.addEventListener('click', () => openAuth('in'));
   els.registerBtn.addEventListener('click', () => openAuth('up'));
   els.settingsBtn.addEventListener('click', openSettings);
   els.statsBtn.addEventListener('click', openStats);
   els.fairnessBtn.addEventListener('click', openFairness);
+  $('drawer-settings')?.addEventListener('click', () => {
+    closeDrawer();
+    openSettings();
+  });
+  $('drawer-stats')?.addEventListener('click', () => {
+    closeDrawer();
+    openStats();
+  });
+  $('drawer-fairness')?.addEventListener('click', () => {
+    closeDrawer();
+    openFairness();
+  });
+  $('drawer-foryou')?.addEventListener('click', () => {
+    closeDrawer();
+    els.foryouStrip?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 
   els.heartBtn.addEventListener('click', () => {
     favored = !favored;
@@ -629,21 +655,8 @@ function bindUI() {
       document.querySelectorAll('.tab-panel').forEach((p) => {
         p.hidden = p.dataset.panel !== id;
       });
-      if (id === 'chat') seedChat();
       if (id === 'stats') renderStatsPanel();
     });
-  });
-
-  els.chatForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const text = els.chatInput.value.trim();
-    if (!text) return;
-    const line = document.createElement('div');
-    line.className = 'chat-line';
-    line.innerHTML = `<b>${t(lang, 'you')}</b> ${text.replace(/</g, '&lt;')}`;
-    els.chatBox.appendChild(line);
-    els.chatBox.scrollTop = els.chatBox.scrollHeight;
-    els.chatInput.value = '';
   });
 
   document.querySelectorAll('.nav-item').forEach((item) => {
@@ -654,12 +667,18 @@ function bindUI() {
     });
   });
 
+  document.querySelectorAll('.fy-card').forEach((card) => {
+    card.addEventListener('click', () => openGame(card.dataset.game));
+  });
+  els.gameBack.addEventListener('click', closeGame);
+
   els.modalBackdrop.addEventListener('click', closeModal);
   els.modalClose.addEventListener('click', closeModal);
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeModal();
-      closeMenu();
+      closeDrawer();
+      if (!els.gameOverlay.hidden) closeGame();
     }
   });
 }
@@ -668,8 +687,7 @@ async function main() {
   load();
   applyI18n();
   updateBalanceUI();
-  updateNetGain();
-  bumpPlayers();
+  updateResultField();
   bindUI();
 
   chart = await createChart(els.stage);
