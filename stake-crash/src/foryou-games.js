@@ -57,56 +57,64 @@ export function createForYouGames({ getBalance, setBalance, getLang, onToast }) 
   let app = null;
   let destroyGame = null;
   let ro = null;
+  let hostEl = null;
 
   async function mountPixi(host) {
-    destroyCurrent();
-    host.replaceChildren();
+    // Tear down previous game scene only (keep one Pixi Application alive)
+    destroyGame?.();
+    destroyGame = null;
+
+    hostEl = host;
     const w = Math.max(300, host.clientWidth || 360);
     const h = Math.max(300, host.clientHeight || 420);
-    app = new Application();
-    await app.init({
-      width: w,
-      height: h,
-      background: C.bg,
-      antialias: true,
-      resolution: Math.min(2, window.devicePixelRatio || 1),
-      autoDensity: true,
-      preference: 'webgl',
-    });
-    host.appendChild(app.canvas);
-    ro = new ResizeObserver(() => {
-      if (!app || !host.isConnected) return;
-      const nw = Math.max(1, host.clientWidth);
-      const nh = Math.max(1, host.clientHeight);
-      app.renderer.resize(nw, nh);
-    });
+
+    if (!app) {
+      app = new Application();
+      await app.init({
+        width: w,
+        height: h,
+        background: C.bg,
+        antialias: true,
+        resolution: Math.min(2, window.devicePixelRatio || 1),
+        autoDensity: true,
+        preference: 'webgl',
+      });
+      ro = new ResizeObserver(() => {
+        if (!app || !hostEl?.isConnected) return;
+        app.renderer.resize(Math.max(1, hostEl.clientWidth), Math.max(1, hostEl.clientHeight));
+      });
+    } else {
+      app.stage.removeChildren().forEach((c) => c.destroy({ children: true }));
+      app.renderer.resize(w, h);
+      app.ticker.start();
+    }
+
+    if (app.canvas.parentNode !== host) {
+      host.replaceChildren();
+      host.appendChild(app.canvas);
+    }
     ro.observe(host);
     return { app, w: app.screen.width, h: app.screen.height };
   }
 
-  function destroyCurrent() {
+  function clearScene() {
     destroyGame?.();
     destroyGame = null;
-    ro?.disconnect();
-    ro = null;
-    if (!app) return;
-    const dying = app;
-    app = null;
-    try {
-      dying.ticker.stop();
-      dying.renderable = false;
-      if (dying.canvas?.parentNode) dying.canvas.parentNode.removeChild(dying.canvas);
-    } catch {
-      /* ignore */
-    }
-    // Destroy after the browser paints — avoids Pixi batcher mid-frame null.clear
-    setTimeout(() => {
+    if (ro && hostEl) {
       try {
-        dying.destroy(true, { children: true });
+        ro.unobserve(hostEl);
       } catch {
         /* ignore */
       }
-    }, 50);
+    }
+    if (app) {
+      try {
+        app.stage.removeChildren().forEach((c) => c.destroy({ children: true }));
+        app.ticker.stop();
+      } catch {
+        /* ignore */
+      }
+    }
   }
 
   function syncBal(span) {
@@ -628,7 +636,7 @@ export function createForYouGames({ getBalance, setBalance, getLang, onToast }) 
         });
       }
     },
-    close: destroyCurrent,
+    close: clearScene,
     syncBal,
   };
 }

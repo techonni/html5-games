@@ -546,13 +546,14 @@ const GAME_TITLES = { mines: 'Mines', scarab: 'Scarab Spin', samurai: 'Blue Samu
 async function openGame(id) {
   closeDrawer();
   els.gameTitle.textContent = GAME_TITLES[id] || id;
+  els.gameControls.replaceChildren();
   els.gameOverlay.hidden = false;
   updateBalanceUI();
   await forYou.open(id, els.gameStage, els.gameControls, els.gameBalance);
 }
 
-function closeGame() {
-  forYou.close();
+async function closeGame() {
+  await forYou.close();
   els.gameControls.replaceChildren();
   els.gameOverlay.hidden = true;
 }
@@ -669,7 +670,9 @@ function bindUI() {
   document.querySelectorAll('.fy-card').forEach((card) => {
     card.addEventListener('click', () => openGame(card.dataset.game));
   });
-  els.gameBack.addEventListener('click', closeGame);
+  els.gameBack.addEventListener('click', () => {
+    void closeGame();
+  });
 
   els.modalBackdrop.addEventListener('click', closeModal);
   els.modalClose.addEventListener('click', closeModal);
