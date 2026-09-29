@@ -86,3 +86,13 @@ Jogo mobile em **flat design** de colecionar e alimentar monstros, publicado em 
 - Explorar: procurar em arbustos, monstros selvagens com raridade (Comum → Lendário) e lançar a bola para os apanhar.
 - Coleção com silhuetas dos monstros por descobrir e troca do monstro ativo.
 - Componentes flat estilo "tátil": botões com degrau sólido, tiles com contorno de 2px, barras de progresso arredondadas. Tudo guardado no browser.
+
+## Crash PixiJS (`crash-pixi/`)
+
+Crash mobile-first feito **só com PixiJS v8 + GSAP + TypeScript**, publicado em `/crash-pixi/`:
+
+- Toda a interface é desenhada no canvas (sem HTML/CSS de UI): cabeçalho com saldo, cena com histórico, curva com gradiente e bola, multiplicador gigante, painel de apostas, seletor Manual/Auto e teclado numérico próprio (também aceita o teclado físico; Espaço = botão principal).
+- Animações em GSAP: pressão dos botões, pílulas do histórico, contagem, explosão do crash, ganho a subir, contador do saldo, folha do teclado.
+- Cores e formas dos tokens "UI Design Rules – HTML5 Games"; layout em coluna no telemóvel e em duas colunas em ecrãs largos.
+- Ronda solo: 5 s de contagem, `m(t) = e^(0.00006·t)`, crash com RTP 99% via `crypto.getRandomValues()`, retirada manual ou automática no alvo; créditos demo guardados no browser.
+- `npm run typecheck` verifica o TypeScript (`tsconfig.json`); `npm run build` corre o typecheck antes do Vite.
