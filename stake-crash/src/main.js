@@ -1,18 +1,16 @@
 import './style.css';
 import { createChart, multAt, msFor } from './chart.js';
 import { crashPoint, randInt } from './rng.js';
+import { t } from './i18n.js';
 
 const WAIT_MS = 5000;
 const CRASH_HOLD_MS = 2800;
-const STORAGE_KEY = 'stake-crash-demo-v1';
-const HI_MULT = 2;
+const STORAGE_KEY = 'zunrel-crash-demo-v2';
 
 const $ = (id) => document.getElementById(id);
 
 const els = {
   stage: $('stage'),
-  history: $('history'),
-  historyRefresh: $('history-refresh'),
   countdownPill: $('countdown-pill'),
   countdownVal: $('countdown-val'),
   crashedPill: $('crashed-pill'),
@@ -29,15 +27,34 @@ const els = {
   cashoutDown: $('cashout-down'),
   cashoutUp: $('cashout-up'),
   toast: $('toast'),
+  menuBtn: $('menu-btn'),
+  topMenu: $('top-menu'),
   signinBtn: $('signin-btn'),
   registerBtn: $('register-btn'),
   fairnessBtn: $('fairness-btn'),
+  settingsBtn: $('settings-btn'),
+  statsBtn: $('stats-btn'),
+  heartBtn: $('heart-btn'),
+  saveBtn: $('save-btn'),
+  chatBox: $('chat-box'),
+  chatForm: $('chat-form'),
+  chatInput: $('chat-input'),
+  statsList: $('stats-list'),
+  modalRoot: $('modal-root'),
+  modalBackdrop: $('modal-backdrop'),
+  modalClose: $('modal-close'),
+  modalTitle: $('modal-title'),
+  modalBody: $('modal-body'),
 };
 
+let lang = 'fr';
 let balance = 10000;
 let history = [];
-let mode = 'manual'; // manual | auto
+let mode = 'manual';
 let chart = null;
+let favored = false;
+let user = null;
+let settings = { sound: true, animations: true, notifications: true };
 
 /** @type {'waiting'|'flying'|'crashed'} */
 let phase = 'waiting';
@@ -45,9 +62,7 @@ let waitStart = 0;
 let flyStart = 0;
 let crashAt = 1;
 let crashHoldStart = 0;
-
-/** Pending / active bet */
-let bet = null; // { amount, target, queued?, cashed?, won? }
+let bet = null;
 let playersOnline = 24;
 let playersInRound = 20;
 
@@ -57,21 +72,28 @@ function load() {
     if (!raw) return;
     const data = JSON.parse(raw);
     if (typeof data.balance === 'number' && data.balance >= 0) balance = data.balance;
-    if (Array.isArray(data.history)) history = data.history.slice(0, 24);
+    if (Array.isArray(data.history)) history = data.history.slice(0, 40);
+    if (data.lang === 'fr' || data.lang === 'pt') lang = data.lang;
+    if (data.settings) settings = { ...settings, ...data.settings };
+    if (typeof data.favored === 'boolean') favored = data.favored;
+    if (data.user?.name) user = data.user;
   } catch {
     /* ignore */
-  }
-  if (!history.length) {
-    history = [1.44, 2.45, 1.28, 3.12, 1.05, 10.02, 25.97, 1.08];
   }
 }
 
 function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ balance, history }));
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({ balance, history, lang, settings, favored, user }),
+  );
 }
 
 function fmtMoney(n) {
-  return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return n.toLocaleString(lang === 'pt' ? 'pt-PT' : 'fr-FR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 function parseNum(str) {
@@ -94,14 +116,33 @@ function showToast(msg, kind = '') {
   }, 2400);
 }
 
-function renderHistory() {
-  els.history.innerHTML = '';
-  for (const m of history) {
-    const pill = document.createElement('span');
-    pill.className = `pill${m >= HI_MULT ? ' hi' : ''}`;
-    pill.textContent = `${m.toFixed(2)}x`;
-    els.history.appendChild(pill);
-  }
+function applyI18n() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    el.textContent = t(lang, el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
+    el.placeholder = t(lang, el.dataset.i18nPlaceholder);
+  });
+  document.querySelectorAll('[data-i18n-aria]').forEach((el) => {
+    el.setAttribute('aria-label', t(lang, el.dataset.i18nAria));
+  });
+  document.querySelectorAll('.lang-btn').forEach((btn) => {
+    btn.classList.toggle('on', btn.dataset.lang === lang);
+  });
+  els.heartBtn.classList.toggle('on', favored);
+  els.heartBtn.setAttribute('aria-pressed', favored ? 'true' : 'false');
+  updateNetGain();
+  updateBalanceUI();
+  setPlayButton();
+  renderStatsPanel();
+}
+
+function setLang(next) {
+  if (next !== 'fr' && next !== 'pt') return;
+  lang = next;
+  save();
+  applyI18n();
 }
 
 function updateBalanceUI() {
@@ -129,24 +170,23 @@ function setPlayButton() {
 
   if (phase === 'flying' && bet && !bet.queued && !bet.cashed) {
     const m = multAt(performance.now() - flyStart);
-    btn.textContent = `Cash Out ${fmtMoney(bet.amount * m)}`;
+    btn.textContent = `${t(lang, 'cashOut')} ${fmtMoney(bet.amount * m)}`;
     btn.classList.add('cashout');
     return;
   }
 
   if (bet?.queued) {
-    btn.textContent = 'Cancel Bet';
+    btn.textContent = t(lang, 'cancelBet');
     btn.classList.add('queued');
     return;
   }
 
   if (phase === 'waiting') {
-    btn.textContent = 'Play';
+    btn.textContent = t(lang, 'play');
     return;
   }
 
-  // flying without active bet, or crashed
-  btn.textContent = 'Play Next Round';
+  btn.textContent = t(lang, 'playNext');
   if (phase === 'crashed') btn.classList.add('waiting');
 }
 
@@ -155,15 +195,15 @@ function placeOrQueueBet() {
   const target = Math.round((parseNum(els.cashoutInput.value) || 0) * 100) / 100;
 
   if (!(amount >= 0.01)) {
-    showToast('Enter a valid amount', 'lose');
+    showToast(t(lang, 'invalidAmount'), 'lose');
     return;
   }
   if (!(target >= 1.01)) {
-    showToast('Cashout must be at least 1.01x', 'lose');
+    showToast(t(lang, 'invalidCashout'), 'lose');
     return;
   }
   if (amount > balance) {
-    showToast('Insufficient balance', 'lose');
+    showToast(t(lang, 'insufficient'), 'lose');
     return;
   }
 
@@ -174,9 +214,9 @@ function placeOrQueueBet() {
   bet = { amount, target, queued: phase !== 'waiting', cashed: null };
 
   if (phase === 'waiting') {
-    showToast(`Bet ${fmtMoney(amount)} G placed`, '');
+    showToast(t(lang, 'betPlaced', { n: fmtMoney(amount) }));
   } else {
-    showToast('Bet queued for next round', '');
+    showToast(t(lang, 'betQueued'));
   }
   setPlayButton();
 }
@@ -187,7 +227,7 @@ function cancelQueued() {
   bet = null;
   updateBalanceUI();
   save();
-  showToast('Bet cancelled');
+  showToast(t(lang, 'betCancelled'));
   setPlayButton();
 }
 
@@ -201,14 +241,13 @@ function cashOut(atMult) {
   balance = Math.round((balance + payout) * 100) / 100;
   updateBalanceUI();
   save();
-  showToast(`Cashed out at ${m.toFixed(2)}x · +${fmtMoney(payout)} G`, 'win');
+  showToast(t(lang, 'cashedOut', { m: m.toFixed(2), n: fmtMoney(payout) }), 'win');
   setPlayButton();
 }
 
 function settleLoss() {
   if (!bet || bet.queued || bet.cashed != null) return;
-  showToast(`Crashed at ${crashAt.toFixed(2)}x`, 'lose');
-  // amount already deducted
+  showToast(t(lang, 'crashedAt', { m: crashAt.toFixed(2) }), 'lose');
   bet.cashed = 0;
   save();
 }
@@ -219,12 +258,7 @@ function startWaiting() {
   els.countdownPill.hidden = false;
   els.crashedPill.hidden = true;
   bumpPlayers();
-
-  // Activate queued bet
-  if (bet?.queued) {
-    bet.queued = false;
-  }
-
+  if (bet?.queued) bet.queued = false;
   chart?.draw({ ms: 0, phase: 'waiting' });
   setPlayButton();
 }
@@ -246,15 +280,11 @@ function startCrashed() {
   els.crashedPill.hidden = false;
 
   history.unshift(crashAt);
-  history = history.slice(0, 24);
-  renderHistory();
+  history = history.slice(0, 40);
   save();
+  renderStatsPanel();
 
-  if (bet && !bet.queued && bet.cashed == null) {
-    settleLoss();
-  }
-
-  // Clear spent bet after crash (keep queued)
+  if (bet && !bet.queued && bet.cashed == null) settleLoss();
   if (bet && !bet.queued) bet = null;
 
   chart?.draw({
@@ -281,7 +311,6 @@ function tick() {
     const ms = now - flyStart;
     const m = multAt(ms);
 
-    // Auto cashout (always when target reached — Stake "Cashout At")
     if (bet && !bet.queued && bet.cashed == null && m >= bet.target && bet.target < crashAt) {
       cashOut(bet.target);
     }
@@ -301,7 +330,197 @@ function tick() {
   }
 }
 
+/* ---------- Modals ---------- */
+function openModal(title, html) {
+  els.modalTitle.textContent = title;
+  els.modalBody.innerHTML = html;
+  els.modalRoot.hidden = false;
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  els.modalRoot.hidden = true;
+  els.modalBody.innerHTML = '';
+  document.body.style.overflow = '';
+}
+
+function openAuth(mode) {
+  const isIn = mode === 'in';
+  openModal(
+    t(lang, isIn ? 'authTitleIn' : 'authTitleUp'),
+    `
+    <p style="margin-bottom:10px">${t(lang, 'authDemo')}</p>
+    ${
+      isIn
+        ? ''
+        : `<div class="form-row"><label>${t(lang, 'username')}</label><input id="auth-user" type="text" autocomplete="username" /></div>`
+    }
+    <div class="form-row"><label>${t(lang, 'email')}</label><input id="auth-email" type="email" autocomplete="email" /></div>
+    <div class="form-row"><label>${t(lang, 'password')}</label><input id="auth-pass" type="password" autocomplete="${isIn ? 'current-password' : 'new-password'}" /></div>
+    <button type="button" class="btn-block" id="auth-submit">${t(lang, isIn ? 'submitIn' : 'submitUp')}</button>
+    `,
+  );
+  $('auth-submit')?.addEventListener('click', () => {
+    const name =
+      $('auth-user')?.value?.trim() ||
+      $('auth-email')?.value?.split('@')[0] ||
+      'Demo';
+    user = { name };
+    save();
+    closeModal();
+    closeMenu();
+    showToast(t(lang, 'authOk', { n: name }), 'win');
+  });
+}
+
+function openSettings() {
+  openModal(
+    t(lang, 'settingsTitle'),
+    `
+    <div class="toggle-row"><span>${t(lang, 'sound')}</span><label class="switch"><input type="checkbox" id="set-sound" ${settings.sound ? 'checked' : ''}/><span></span></label></div>
+    <div class="toggle-row"><span>${t(lang, 'animations')}</span><label class="switch"><input type="checkbox" id="set-anim" ${settings.animations ? 'checked' : ''}/><span></span></label></div>
+    <div class="toggle-row"><span>${t(lang, 'notifications')}</span><label class="switch"><input type="checkbox" id="set-notif" ${settings.notifications ? 'checked' : ''}/><span></span></label></div>
+    <button type="button" class="btn-block" id="set-save">${t(lang, 'saveGame')}</button>
+    `,
+  );
+  $('set-save')?.addEventListener('click', () => {
+    settings = {
+      sound: !!$('set-sound')?.checked,
+      animations: !!$('set-anim')?.checked,
+      notifications: !!$('set-notif')?.checked,
+    };
+    save();
+    closeModal();
+    showToast(t(lang, 'savedSettings'));
+  });
+}
+
+function statsData() {
+  const rounds = history.length;
+  const avg = rounds ? history.reduce((a, b) => a + b, 0) / rounds : 0;
+  const best = rounds ? Math.max(...history) : 0;
+  return { rounds, avg, best };
+}
+
+function renderStatsPanel() {
+  if (!els.statsList) return;
+  const { rounds, avg, best } = statsData();
+  els.statsList.innerHTML = `
+    <li><span>${t(lang, 'rounds')}</span><strong>${rounds}</strong></li>
+    <li><span>${t(lang, 'avgCrash')}</span><strong>${avg ? avg.toFixed(2) + 'x' : '—'}</strong></li>
+    <li><span>${t(lang, 'bestCrash')}</span><strong>${best ? best.toFixed(2) + 'x' : '—'}</strong></li>
+    <li><span>${t(lang, 'balanceLabel')}</span><strong>${fmtMoney(balance)} C</strong></li>
+  `;
+}
+
+function openStats() {
+  const { rounds, avg, best } = statsData();
+  openModal(
+    t(lang, 'statsTitle'),
+    `
+    <ul class="stats-list">
+      <li><span>${t(lang, 'rounds')}</span><strong>${rounds}</strong></li>
+      <li><span>${t(lang, 'avgCrash')}</span><strong>${avg ? avg.toFixed(2) + 'x' : '—'}</strong></li>
+      <li><span>${t(lang, 'bestCrash')}</span><strong>${best ? best.toFixed(2) + 'x' : '—'}</strong></li>
+      <li><span>${t(lang, 'balanceLabel')}</span><strong>${fmtMoney(balance)} C</strong></li>
+    </ul>
+    <button type="button" class="btn-ghost" id="stats-close">${t(lang, 'close')}</button>
+    `,
+  );
+  $('stats-close')?.addEventListener('click', closeModal);
+}
+
+function openFairness() {
+  openModal(
+    t(lang, 'fairnessTitle'),
+    `<p>${t(lang, 'fairnessBody')}</p><button type="button" class="btn-ghost" id="fair-close">${t(lang, 'close')}</button>`,
+  );
+  $('fair-close')?.addEventListener('click', closeModal);
+}
+
+function openBalanceMenu() {
+  openModal(
+    t(lang, 'balanceLabel'),
+    `
+    <p style="margin-bottom:8px"><strong>${fmtMoney(balance)} C</strong></p>
+    <button type="button" class="btn-block" id="refill-btn">${t(lang, 'refill')}</button>
+    <button type="button" class="btn-ghost" id="bal-close">${t(lang, 'close')}</button>
+    `,
+  );
+  $('refill-btn')?.addEventListener('click', () => {
+    balance = 10000;
+    updateBalanceUI();
+    save();
+    closeModal();
+    showToast(t(lang, 'refilled'), 'win');
+  });
+  $('bal-close')?.addEventListener('click', closeModal);
+}
+
+function openNavPanel(nav) {
+  const map = {
+    browse: ['browseTitle', 'browseBody'],
+    foryou: ['forYouTitle', 'forYouBody'],
+    casino: ['casinoTitle', 'casinoBody'],
+    chat: null,
+  };
+  if (nav === 'chat') {
+    document.querySelector('.info-tab[data-tab="chat"]')?.click();
+    document.getElementById('info-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
+  const keys = map[nav];
+  if (!keys) return;
+  openModal(
+    t(lang, keys[0]),
+    `<p>${t(lang, keys[1])}</p><button type="button" class="btn-ghost" id="nav-close">${t(lang, 'close')}</button>`,
+  );
+  $('nav-close')?.addEventListener('click', closeModal);
+}
+
+function closeMenu() {
+  els.topMenu.hidden = true;
+  els.menuBtn.classList.remove('open');
+  els.menuBtn.setAttribute('aria-expanded', 'false');
+}
+
+function toggleMenu() {
+  const open = els.topMenu.hidden;
+  els.topMenu.hidden = !open;
+  els.menuBtn.classList.toggle('open', open);
+  els.menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+function seedChat() {
+  if (els.chatBox.children.length) return;
+  const bots = ['Alex', 'Mia', 'Noah'];
+  bots.forEach((name) => {
+    const line = document.createElement('div');
+    line.className = 'chat-line';
+    line.innerHTML = `<b>${name}</b> ${t(lang, 'chatJoined')}`;
+    els.chatBox.appendChild(line);
+  });
+}
+
 function bindUI() {
+  els.menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMenu();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!els.topMenu.hidden && !els.topMenu.contains(e.target) && e.target !== els.menuBtn) {
+      closeMenu();
+    }
+  });
+
+  document.querySelectorAll('.lang-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setLang(btn.dataset.lang);
+    });
+  });
+
   els.playBtn.addEventListener('click', () => {
     if (phase === 'flying' && bet && !bet.queued && bet.cashed == null) {
       cashOut(multAt(performance.now() - flyStart));
@@ -340,16 +559,12 @@ function bindUI() {
 
   els.amountInput.addEventListener('input', updateNetGain);
   els.cashoutInput.addEventListener('input', updateNetGain);
-
   els.amountInput.addEventListener('blur', () => {
-    const v = parseNum(els.amountInput.value) || 0;
-    els.amountInput.value = formatInput(Math.max(0, v));
+    els.amountInput.value = formatInput(Math.max(0, parseNum(els.amountInput.value) || 0));
     updateNetGain();
   });
-
   els.cashoutInput.addEventListener('blur', () => {
-    const v = parseNum(els.cashoutInput.value) || 1.01;
-    els.cashoutInput.value = formatInput(Math.max(1.01, v));
+    els.cashoutInput.value = formatInput(Math.max(1.01, parseNum(els.cashoutInput.value) || 1.01));
     updateNetGain();
   });
 
@@ -361,51 +576,83 @@ function bindUI() {
         b.classList.toggle('on', on);
         b.setAttribute('aria-selected', on ? 'true' : 'false');
       });
-      if (mode === 'auto') {
-        showToast('Auto mode: cashout at your target every round');
-      }
+      if (mode === 'auto') showToast(t(lang, 'autoMode'));
     });
   });
 
-  els.historyRefresh.addEventListener('click', () => {
-    els.historyRefresh.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(360deg)' }], {
-      duration: 450,
-      easing: 'ease-out',
-    });
-    renderHistory();
+  els.balanceBtn.addEventListener('click', openBalanceMenu);
+  els.signinBtn.addEventListener('click', () => openAuth('in'));
+  els.registerBtn.addEventListener('click', () => openAuth('up'));
+  els.settingsBtn.addEventListener('click', openSettings);
+  els.statsBtn.addEventListener('click', openStats);
+  els.fairnessBtn.addEventListener('click', openFairness);
+
+  els.heartBtn.addEventListener('click', () => {
+    favored = !favored;
+    els.heartBtn.classList.toggle('on', favored);
+    els.heartBtn.setAttribute('aria-pressed', favored ? 'true' : 'false');
+    save();
+    showToast(t(lang, favored ? 'favored' : 'unfavored'));
   });
 
-  els.balanceBtn.addEventListener('click', () => {
-    if (balance < 100) {
-      balance = 10000;
-      updateBalanceUI();
-      save();
-      showToast('Demo balance refilled to 10,000 G');
-    } else {
-      showToast(`Balance: ${fmtMoney(balance)} G (demo)`);
+  els.saveBtn.addEventListener('click', () => {
+    save();
+    showToast(t(lang, 'savedGame'), 'win');
+  });
+
+  document.querySelectorAll('.info-tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const id = tab.dataset.tab;
+      document.querySelectorAll('.info-tab').forEach((tEl) => tEl.classList.toggle('on', tEl === tab));
+      document.querySelectorAll('.tab-panel').forEach((p) => {
+        p.hidden = p.dataset.panel !== id;
+      });
+      if (id === 'chat') seedChat();
+      if (id === 'stats') renderStatsPanel();
+    });
+  });
+
+  els.chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = els.chatInput.value.trim();
+    if (!text) return;
+    const line = document.createElement('div');
+    line.className = 'chat-line';
+    line.innerHTML = `<b>${t(lang, 'you')}</b> ${text.replace(/</g, '&lt;')}`;
+    els.chatBox.appendChild(line);
+    els.chatBox.scrollTop = els.chatBox.scrollHeight;
+    els.chatInput.value = '';
+  });
+
+  document.querySelectorAll('.nav-item').forEach((item) => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach((n) => n.classList.remove('active'));
+      item.classList.add('active');
+      openNavPanel(item.dataset.nav);
+    });
+  });
+
+  els.modalBackdrop.addEventListener('click', closeModal);
+  els.modalClose.addEventListener('click', closeModal);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+      closeMenu();
     }
   });
-
-  els.signinBtn.addEventListener('click', () => showToast('Demo mode — no account needed'));
-  els.registerBtn.addEventListener('click', () => showToast('Demo mode — fictional credits only'));
-  els.fairnessBtn.addEventListener('click', () =>
-    showToast('Provably fair demo: crypto.getRandomValues(), RTP 99%'),
-  );
 }
 
 async function main() {
   load();
-  renderHistory();
+  applyI18n();
   updateBalanceUI();
   updateNetGain();
   bumpPlayers();
   bindUI();
 
   chart = await createChart(els.stage);
-
   startWaiting();
 
-  // Auto-bet hook: poll lightly
   setInterval(() => {
     if (mode === 'auto' && phase === 'waiting' && !bet) {
       const amount = parseNum(els.amountInput.value) || 0;
@@ -422,5 +669,5 @@ async function main() {
 
 main().catch((err) => {
   console.error(err);
-  showToast('Failed to start PixiJS canvas', 'lose');
+  showToast(t(lang, 'pixiFail'), 'lose');
 });
