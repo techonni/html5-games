@@ -18,7 +18,9 @@ const multAt = (ms) => Math.exp(K * ms);
 const msFor = (m) => Math.log(m) / K;
 
 // Cor da pastilha do histórico consoante o escalão do multiplicador (como na Stake).
-const tierOf = (m) => (m < 2 ? 'blue' : m < 10 ? 'purple' : 'pink');
+const TIER_BLUE_MAX = 2; // < 2× → azul
+const TIER_PURPLE_MAX = 10; // 2×–10× → roxo, ≥10× → rosa
+const tierOf = (m) => (m < TIER_BLUE_MAX ? 'blue' : m < TIER_PURPLE_MAX ? 'purple' : 'pink');
 
 export default {
   id: 'crash',
@@ -131,22 +133,22 @@ export default {
         const t = (ms * i) / steps;
         pts.push([px(t), py(multAt(t))]);
       }
+      const trace = (g) => {
+        g.moveTo(pts[0][0], pts[0][1]);
+        for (let i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]);
+      };
 
-      curve.moveTo(pts[0][0], pts[0][1]);
-      pts.slice(1).forEach(([x, y]) => curve.lineTo(x, y));
+      trace(curve);
       curve.lineTo(px(ms), gy0).lineTo(px(0), gy0).closePath();
       curve.fill({ color, alpha: 0.18 });
 
       // Brilho suave por trás da linha principal (efeito "neon" da Stake).
-      glowTrail.moveTo(pts[0][0], pts[0][1]);
-      pts.slice(1).forEach(([x, y]) => glowTrail.lineTo(x, y));
+      trace(glowTrail);
       glowTrail.stroke({ width: 16, color, alpha: 0.16, cap: 'round', join: 'round' });
 
-      curve.moveTo(pts[0][0], pts[0][1]);
-      pts.slice(1).forEach(([x, y]) => curve.lineTo(x, y));
+      trace(curve);
       curve.stroke({ width: 4, color, cap: 'round', join: 'round' });
-      curve.moveTo(pts[0][0], pts[0][1]);
-      pts.slice(1).forEach(([x, y]) => curve.lineTo(x, y));
+      trace(curve);
       curve.stroke({ width: 1.5, color: 0xffffff, alpha: 0.85, cap: 'round', join: 'round' });
       if (cashedAt) {
         const cm = Math.min(cashedAt, m);
