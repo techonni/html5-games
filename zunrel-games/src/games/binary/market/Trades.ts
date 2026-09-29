@@ -29,7 +29,7 @@ export interface Position {
   pnl?: number;
 }
 
-const KEY = 'zunrel-binary:v1';
+const KEY = 'zunrel-binary:v2';
 export const START_BALANCE = 10_000;
 
 interface Saved {

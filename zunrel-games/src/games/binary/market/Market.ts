@@ -1,19 +1,19 @@
-/** Índices sintéticos "Volatility (1s)": 1 tick por segundo, movimento log-normal. */
+/** Pares de forex (cotações demo simuladas): 1 tick por segundo, movimento log-normal. */
 export interface MarketDef {
   id: string;
   name: string;
   badge: string;
+  /** Descrição curta do par (ex.: "Euro / Dólar americano"). */
+  full: string;
   vol: number;
   start: number;
   decimals: number;
 }
 
 export const MARKETS: MarketDef[] = [
-  { id: 'R_10', name: 'Volatility 10 (1s) Index', badge: '10', vol: 0.1, start: 6254.37, decimals: 2 },
-  { id: 'R_25', name: 'Volatility 25 (1s) Index', badge: '25', vol: 0.25, start: 3521.842, decimals: 3 },
-  { id: 'R_50', name: 'Volatility 50 (1s) Index', badge: '50', vol: 0.5, start: 243.1873, decimals: 4 },
-  { id: 'R_75', name: 'Volatility 75 (1s) Index', badge: '75', vol: 0.75, start: 12045.61, decimals: 2 },
-  { id: 'R_100', name: 'Volatility 100 (1s) Index', badge: '100', vol: 1, start: 985.58, decimals: 2 },
+  { id: 'EURUSD', name: 'EUR/USD', badge: 'EUR', full: 'Euro / Dólar americano', vol: 0.08, start: 1.0852, decimals: 5 },
+  { id: 'GBPUSD', name: 'GBP/USD', badge: 'GBP', full: 'Libra / Dólar americano', vol: 0.09, start: 1.2718, decimals: 5 },
+  { id: 'USDJPY', name: 'USD/JPY', badge: 'JPY', full: 'Dólar americano / Iene', vol: 0.1, start: 149.62, decimals: 3 },
 ];
 
 export interface Tick {
@@ -21,22 +21,10 @@ export interface Tick {
   q: number;
 }
 
-export interface Candle {
-  t: number;
-  o: number;
-  h: number;
-  l: number;
-  c: number;
-}
-
-export const INTERVALS = [0, 60, 300] as const;
-export type Interval = (typeof INTERVALS)[number];
-
 const SECONDS_PER_YEAR = 365 * 24 * 3600;
-// Os índices sintéticos são mais nervosos do que a vol anual sugere: fator para ticks visíveis.
-const SPEED = 12;
+// Demo: o tempo corre mais depressa do que no mercado real, para os ticks de 1 s se verem mexer.
+const SPEED = 16;
 const KEEP_TICKS = 600;
-const KEEP_CANDLES = 120;
 
 function gaussian(): number {
   const u = crypto.getRandomValues(new Uint32Array(2));
@@ -48,14 +36,13 @@ function gaussian(): number {
 export class Market {
   readonly sigma: number;
   ticks: Tick[] = [];
-  readonly candles: Record<60 | 300, Candle[]> = { 60: [], 300: [] };
   /** Preço de abertura da sessão (para a variação %). */
   open: number;
 
   constructor(readonly def: MarketDef, now: number) {
     this.sigma = (def.vol * Math.sqrt(SPEED)) / Math.sqrt(SECONDS_PER_YEAR);
-    // Histórico de 3 h para já haver velas de 5 min ao abrir a app.
-    const back = 3 * 3600;
+    // 1 h de histórico: variação da sessão e minigráficos logo ao abrir.
+    const back = 3600;
     let q = def.start;
     const past: number[] = [];
     for (let i = 0; i < back; i++) {
@@ -95,19 +82,6 @@ export class Market {
   private push(tick: Tick): void {
     this.ticks.push(tick);
     if (this.ticks.length > KEEP_TICKS) this.ticks.splice(0, this.ticks.length - KEEP_TICKS);
-    for (const iv of [60, 300] as const) {
-      const list = this.candles[iv];
-      const t0 = Math.floor(tick.t / iv) * iv;
-      const c = list[list.length - 1];
-      if (c && c.t === t0) {
-        c.h = Math.max(c.h, tick.q);
-        c.l = Math.min(c.l, tick.q);
-        c.c = tick.q;
-      } else {
-        list.push({ t: t0, o: c ? c.c : tick.q, h: tick.q, l: tick.q, c: tick.q });
-        if (list.length > KEEP_CANDLES) list.shift();
-      }
-    }
   }
 }
 

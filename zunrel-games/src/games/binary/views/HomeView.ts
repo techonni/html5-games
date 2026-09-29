@@ -28,7 +28,7 @@ export class HomeView extends Container {
   constructor(private readonly feed: Feed) {
     super();
     this.title = makeText('Mercados', { fontSize: 26, fontWeight: '800', fill: C.text });
-    this.note = makeText('Índices sintéticos · 1 tick por segundo', { fontSize: 15, fontWeight: '500', fill: C.textMuted });
+    this.note = makeText('Forex · cotações demo, 1 tick por segundo', { fontSize: 15, fontWeight: '500', fill: C.textMuted });
     this.addChild(this.title, this.note, this.list);
   }
 
@@ -52,16 +52,18 @@ export class HomeView extends Container {
       const bt = makeText(m.def.badge, { fontSize: 16, fontWeight: '800', fill: C.text });
       bt.anchor.set(0.5);
       bt.position.set(40, 42);
-      const name = makeText(m.def.name.replace(' Index', ''), { fontSize: 16, fontWeight: '700', fill: C.text });
-      name.position.set(78, 18);
+      const name = makeText(m.def.name, { fontSize: 17, fontWeight: '700', fill: C.text });
+      name.position.set(78, 14);
+      const full = makeText(m.def.full, { fontSize: 13, fontWeight: '500', fill: C.textPlaceholder });
+      full.position.set(78, 36);
       const price = makeText('', { fontSize: 15, fontWeight: '600', fill: C.textMuted });
-      price.position.set(78, 46);
+      price.position.set(78, 54);
       const change = makeText('', { fontSize: 15, fontWeight: '700', fill: C.up });
       change.anchor.set(1, 0);
       change.position.set(this.w - 16, 46);
       const spark = new Graphics();
       spark.position.set(this.w - 106, 16);
-      row.addChild(bg, badge, bt, name, price, change, spark);
+      row.addChild(bg, badge, bt, name, full, price, change, spark);
       row.eventMode = 'static';
       row.cursor = 'pointer';
       row.hitArea = new Rectangle(0, 0, this.w, ROW_H);

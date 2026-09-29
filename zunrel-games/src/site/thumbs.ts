@@ -134,8 +134,8 @@ export class BinaryThumb extends Container implements Thumb {
   private w = 300;
   private h = 180;
   private acc = 0;
-  private q = 987.35;
-  private entryQ = 987.1;
+  private q = 1.0852;
+  private entryQ = 1.085;
 
   constructor() {
     super();
@@ -146,7 +146,7 @@ export class BinaryThumb extends Container implements Thumb {
   }
 
   private walk(): number {
-    this.q += (Math.random() - 0.5) * 0.6;
+    this.q += (Math.random() - 0.5) * 0.00012;
     return this.q;
   }
 
@@ -167,8 +167,8 @@ export class BinaryThumb extends Container implements Thumb {
       this.pts.shift();
       if (Math.random() < 0.05) this.entryQ = this.q;
     }
-    const lo = Math.min(...this.pts, this.entryQ) - 0.4;
-    const hi = Math.max(...this.pts, this.entryQ) + 0.4;
+    const lo = Math.min(...this.pts, this.entryQ) - 0.0001;
+    const hi = Math.max(...this.pts, this.entryQ) + 0.0001;
     const x0 = 14;
     const x1 = this.w * 0.62;
     const Y = (v: number) => this.h - 22 - ((v - lo) / (hi - lo)) * (this.h - 50);
@@ -187,7 +187,7 @@ export class BinaryThumb extends Container implements Thumb {
     for (let x = x0; x < this.w - 70; x += 9) this.entry.moveTo(x, ey).lineTo(x + 5, ey);
     this.entry.stroke({ width: 2, color: this.q >= this.entryQ ? C.up : C.down });
     this.dot.position.set(lx, ly);
-    this.tagText.text = this.q.toFixed(2);
+    this.tagText.text = this.q.toFixed(5);
     const tw = this.tagText.width + 16;
     this.tag.clear().roundRect(this.w - 8 - tw, ly - 14, tw, 28, 6).fill(C.btnPrimary);
     this.tagText.position.set(this.w - 8 - tw / 2, ly);

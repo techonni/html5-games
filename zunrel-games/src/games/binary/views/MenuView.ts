@@ -20,7 +20,7 @@ export class MenuView extends Container {
     this.title = makeText('Menu', { fontSize: 26, fontWeight: '800', fill: C.text });
     this.about = makeText('', { fontSize: 15, fontWeight: '500', fill: C.textMuted, wordWrap: true, wordWrapWidth: 320, lineHeight: 22 });
     this.about.text =
-      'zunrel Binary — simulador demo de opções binárias "tudo ou nada" sobre índices sintéticos.\n\n' +
+      'zunrel Binary — simulador demo de opções binárias "tudo ou nada" sobre forex (EUR/USD, GBP/USD e USD/JPY), com cotações simuladas.\n\n' +
       'Binary: 1–15 min, lucro fixo de 85%. Turbo: 30 s–5 min, lucro de 80%. ' +
       'O contrato é decidido pela cotação no segundo exato do vencimento; empate devolve a aposta.\n\n' +
       'Créditos fictícios, sem dinheiro real. Feito com PixiJS, GSAP, TypeScript e Howler.js.';

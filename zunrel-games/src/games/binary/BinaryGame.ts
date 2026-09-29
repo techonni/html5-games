@@ -5,7 +5,7 @@ import { makeText } from './text';
 import type { GameScene } from '../../core/scene';
 import { clamp, fmt, fmtDuration, fmtEur, fmtSigned } from './format';
 import { sound } from './audio/Sound';
-import { Feed, INTERVALS, type Interval } from './market/Market';
+import { Feed } from './market/Market';
 import { Book, TRADE_TYPES, type Direction, type Position } from './market/Trades';
 import { Button } from './ui/Button';
 import { Keypad } from './ui/Keypad';
@@ -48,12 +48,11 @@ export class BinaryGame implements GameScene {
   private readonly toast = new Toast();
 
   private tab: Tab = 'trade';
-  private marketId = 'R_100';
+  private marketId = 'EURUSD';
   private typeIdx = 0;
   private dir: Direction = 'up';
   private durations: Record<string, number> = { binary: 60, turbo: 30 };
   private stake = 2;
-  private interval: Interval = 0;
 
   constructor() {
     this.positions = new PositionsView(this.feed, this.book);
@@ -112,16 +111,10 @@ export class BinaryGame implements GameScene {
           this.syncTrade();
         },
       );
-    t.chart.onMenu = () =>
-      this.sheet.open(
-        'Intervalo do gráfico',
-        INTERVALS.map((iv) => ({ label: iv === 0 ? '1 tick (linha)' : `Velas de ${iv / 60} min`, selected: iv === this.interval })),
-        (i) => {
-          this.interval = INTERVALS[i];
-          this.trade.chart.setInterval(this.interval);
-        },
-      );
-    t.dir.onChange = (i) => (this.dir = i === 0 ? 'up' : 'down');
+    t.dir.onChange = (i) => {
+      this.dir = i === 0 ? 'up' : 'down';
+      sound.play(i === 0 ? 'up' : 'down');
+    };
     t.duration.onTap = () =>
       this.sheet.open(
         `Duração · ${this.type.name}`,
@@ -222,7 +215,7 @@ export class BinaryGame implements GameScene {
   private pickMarket(): void {
     this.sheet.open(
       'Mercados',
-      this.feed.markets.map((m) => ({ label: m.def.name.replace(' Index', ''), badge: m.def.badge, sub: m.last.q.toFixed(m.def.decimals), selected: m.id === this.marketId })),
+      this.feed.markets.map((m) => ({ label: m.def.name, badge: m.def.badge, sub: m.last.q.toFixed(m.def.decimals), selected: m.id === this.marketId })),
       (i) => this.selectMarket(this.feed.markets[i].id),
     );
   }
@@ -240,7 +233,6 @@ export class BinaryGame implements GameScene {
     this.trade.setMarket(m.def.name, m.def.badge);
     this.trade.setType(ty.name);
     this.trade.chart.setMarket(m);
-    this.trade.chart.setInterval(this.interval);
     this.trade.chart.setPositions(this.book.open);
     this.trade.duration.setValue(fmtDuration(this.durations[ty.id]));
     this.trade.stake.setValue(`€${fmt(this.stake).replace(/\.00$/, '')}`);
