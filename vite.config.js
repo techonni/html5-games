@@ -9,6 +9,7 @@ export default defineConfig({
       input: {
         main: 'index.html',
         trader: 'binary-options/index.html',
+        monster: 'clumsy-monster/index.html',
       },
     },
   },

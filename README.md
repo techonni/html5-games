@@ -56,3 +56,13 @@ Simulador mobile de negociação demo em PixiJS, publicado em `/binary-options/`
 - **Multipliers** (Up/Down, x1–x300, take profit/stop loss, stop out).
 - Separadores Trade / Positions (abertas e fechadas), modo de ecrã inteiro e saldo demo de 10 000 EUR.
 - Layout desktop (≥ 900px): barra lateral, separadores de mercados com P/L, painel de parâmetros (stop out, stop out level, comissão), gaveta de posições com botão Close, ferramentas do gráfico (tipo/intervalo, linhas horizontais, média móvel, exportar PNG), zoom e arrastar, relógio GMT e tema escuro.
+
+## Clumsy Monster (`clumsy-monster/`)
+
+Web app mobile em **three.js**, publicada em `/clumsy-monster/`:
+
+- 6 monstros modelados em 3D só com código (primitivas, materiais físicos "vinil", iluminação de estúdio), com respiração, piscar de olhos, chama animada e tentáculos.
+- Ecrã de boas-vindas com o trio de monstros e ecrã de escolha com estatísticas, halo colorido e carrossel com miniaturas renderizadas em 3D.
+- Tocar num monstro faz com que tropece e caia; arrastar roda-o. O monstro escolhido fica guardado e aparece no centro do ecrã inicial.
+- Um único canvas WebGL desenha várias zonas da página (scissor), por isso os monstros podem "sair" dos cartões.
+- No telemóvel os ecrãs deslizam (com botão de voltar do browser); no desktop aparecem lado a lado, como no mockup.
