@@ -67,6 +67,15 @@ Web app mobile em **three.js**, publicada em `/clumsy-monster/`:
 - Um único canvas WebGL desenha várias zonas da página (scissor), por isso os monstros podem "sair" dos cartões.
 - No telemóvel os ecrãs deslizam (com botão de voltar do browser); no desktop aparecem lado a lado, como no mockup.
 
+## Stake Crash (`stake-crash/`)
+
+Clone mobile-first estilo **Stake.us Crash** em PixiJS, publicado em `/stake-crash/`:
+
+- UI pixel-perfect (header Stake.us, histórico de multiplicadores, painel de aposta Amount / Cashout At / Net Gain, Manual/Auto, nav inferior).
+- Canvas PixiJS v8 com curva exponencial, multiplicador 3D e tip animado; estados Waiting (5s) → Flying → Crashed.
+- RTP 99% via `crypto.getRandomValues()`; cashout automático no alvo; créditos demo em Gold (G).
+- Regras: aposta no intervalo de 5s; o foguetão sobe; se atingir o teu cashout antes de rebentar, ganhas; caso contrário, perdes.
+
 ## Nhami (`nhami/`)
 
 Jogo mobile em **flat design** de colecionar e alimentar monstros, publicado em `/nhami/`:
