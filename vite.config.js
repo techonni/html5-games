@@ -11,6 +11,7 @@ export default defineConfig({
         trader: 'binary-options/index.html',
         monster: 'clumsy-monster/index.html',
         nhami: 'nhami/index.html',
+        stakeCrash: 'stake-crash/index.html',
       },
     },
   },

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#1a2733" />
+    <title>Crash — Stake Originals (PixiJS demo)</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fredoka:wght@600;700&family=Kaushan+Script&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="app" id="app">
+      <header class="hdr">
+        <div class="logo"><span class="logo-t">Stake</span><span class="logo-us">.us</span></div>
+        <button class="btn btn-grey">Sign In</button>
+        <button class="btn btn-blue">Register</button>
+      </header>
+
+      <main class="scroll" id="scroll">
+        <section class="card">
+          <div class="stage" id="stage"></div>
+          <div class="controls">
+            <button class="play" id="play">Play</button>
+
+            <div class="auto-only" id="auto-count-wrap">
+              <label class="lbl">Number of Bets</label>
+              <div class="field"><input id="bets" inputmode="numeric" value="0" /></div>
+            </div>
+
+            <label class="lbl">Amount</label>
+            <div class="field split">
+              <div class="in"><input id="amount" inputmode="decimal" value="0.00" /><i class="coin">G</i></div>
+              <div class="side"><button id="half">½</button><span class="sep"></span><button id="double">2×</button></div>
+            </div>
+
+            <label class="lbl">Cashout At</label>
+            <div class="field split cash">
+              <div class="in"><input id="cashout" inputmode="decimal" value="2,00" /></div>
+              <div class="side">
+                <button id="c-down" aria-label="Decrease"><svg viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></svg></button><span class="sep"></span>
+                <button id="c-up" aria-label="Increase"><svg viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg></button>
+              </div>
+            </div>
+
+            <label class="lbl">Net Gain on Win</label>
+            <div class="field ro"><input id="gain" value="0.00" readonly /><i class="coin">G</i></div>
+
+            <div class="bettors" id="bettors">
+              <button class="bettors-row" id="bettors-toggle">
+                <span class="b-users"><svg viewBox="0 0 24 24" class="ico"><use href="#i-users"/></svg><b id="b-count">0</b></span>
+                <span class="b-total"><i class="coin">G</i><b id="b-total">0.00</b></span>
+                <svg viewBox="0 0 24 24" class="chev" id="b-chev"><path d="M5 9l7 7 7-7"/></svg>
+              </button>
+              <ul class="b-list" id="b-list"></ul>
+            </div>
+
+            <div class="mode" id="mode">
+              <button class="on" data-mode="manual">Manual</button>
+              <button data-mode="auto">Auto</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card bar">
+          <div class="bar-l">
+            <svg viewBox="0 0 24 24" class="ico g"><use href="#i-gear"/></svg>
+            <svg viewBox="0 0 24 24" class="ico g"><use href="#i-stats"/></svg>
+          </div>
+          <button class="fair" id="fair"><svg viewBox="0 0 24 24"><use href="#i-shield"/></svg>Fairness</button>
+        </section>
+
+        <section class="card info">
+          <div class="pub">
+            <div class="pub-logo"><span>Stake</span></div>
+            <div class="pub-t"><b>Stake Originals</b><span><em>79.37K</em> Followers</span></div>
+            <button class="heart" id="heart" aria-label="Follow"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg></button>
+          </div>
+          <hr />
+          <div class="title"><h2>Crash</h2><button class="chip-btn">Save Game</button><svg viewBox="0 0 24 24" class="chev t-chev"><path d="M5 9l7 7 7-7"/></svg></div>
+          <div class="tabs" id="tabs">
+            <button data-tab="stats">Game Statistics</button>
+            <button class="on" data-tab="desc">Description</button>
+            <button data-tab="chat">Chat</button>
+          </div>
+          <div class="tab" id="tab-desc">
+            <div class="tags"><span>RTP: 99.00%</span><span>Provably Fair</span><span>Stake Originals</span></div>
+            <p>Predict the multiplier in this quick and simplistic odds-based fun social casino game, Crash! Take on the house with a variety of different strategies to defeat the house and win!</p>
+            <p>Crash is a simple game of chance where the player picks the amount for a playing round as an icon representing a rocket flies through a grid. The amount climbs until the rocket 'crashes' and as long as the player's amount is lower than the crash amount, the player can win!</p>
+            <p>This version of Crash is a proud <a>Stake Original</a> and one of the most popular games on our <a>online social casino</a>.</p>
+            <h3>How to Play Crash</h3>
+            <p>Crash is a classic luck-based type of game that is easy to get started with, even for new players not familiar with casino games.</p>
+            <p>As this is purely a game of chance, strategies involve how a one plays. Players playing on low amounts aim for more consistent wins whilst higher amounts aim for a higher win in a single round with more volatile gameplay.</p>
+            <p>The concept is simple: every 5 seconds after a round of Crash is played, players can make their decision to what the amount will be for the upcoming round.</p>
+            <p>This is the amount that the player will get before the rocket 'crashes'. If the player hits this amount during a round, they receive a win based on that amount. However, if the rocket crashes at an amount lower than their win, the player loses for that round.</p>
+            <p>One of the exciting aspects of Crash is that it is a real-time game and is considered a favourite amongst the Stake Community. Every round is shared by all players at the same time.</p>
+          </div>
+          <div class="tab" id="tab-stats" hidden></div>
+          <div class="tab" id="tab-chat" hidden><p>Chat is not available in this demo.</p></div>
+        </section>
+        <div class="spacer"></div>
+      </main>
+
+      <nav class="nav">
+        <a><svg viewBox="0 0 24 24"><use href="#i-browse"/></svg>Browse</a>
+        <a><svg viewBox="0 0 24 24"><use href="#i-foryou"/></svg>For You</a>
+        <a><svg viewBox="0 0 24 24"><use href="#i-chat"/></svg>Chat</a>
+        <a class="on"><svg viewBox="0 0 24 24"><use href="#i-casino"/></svg>Casino</a>
+      </nav>
+      <button class="to-top" id="to-top" aria-label="Top"><svg viewBox="0 0 24 24"><path d="M6 4h12M12 20V8M6 13l6-6 6 6"/></svg></button>
+      <div class="toast" id="toast"></div>
+    </div>
+
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="i-users" viewBox="0 0 24 24"><circle cx="12" cy="7.5" r="3.6"/><circle cx="4.6" cy="9.4" r="2.6"/><circle cx="19.4" cy="9.4" r="2.6"/><path d="M5.2 20c0-3.6 3-6 6.8-6s6.8 2.4 6.8 6z"/><path d="M0.6 17.6c0-2.5 1.8-4.2 4-4.2 -1 1-1.6 2.3-1.7 3.8 -1 .1-1.8.2-2.3.4zM23.4 17.6c0-2.5-1.8-4.2-4-4.2 1 1 1.6 2.3 1.7 3.8 1 .1 1.8.2 2.3.4z"/></symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24"><path d="M10.3 2h3.4l.5 2.6c.6.2 1.1.5 1.6.9l2.5-.9 1.7 3-2 1.7c.1.6.1 1.100 0 1.700l2 1.700-1.700 3-2.500-.900c-.500.400-1 .700-1.600.900L13.700 18h-3.400l-.5-2.600c-.6-.2-1.100-.5-1.600-.9l-2.500.9-1.700-3 2-1.700a5 5 0 010-1.700l-2-1.700 1.700-3 2.500.9c.5-.4 1-.7 1.600-.9zM12 8.500a2.500 2.500 0 100 5 2.500 2.500 0 000-5z" transform="translate(0 2)"/></symbol>
+      <symbol id="i-stats" viewBox="0 0 24 24"><rect x="3" y="12" width="5" height="9" rx="2"/><rect x="9.500" y="3" width="5" height="18" rx="2"/><rect x="16" y="9" width="5" height="12" rx="2"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 1.500l9 3v6.500c0 5.500-3.800 9.500-9 11.500C6.800 20.500 3 16.500 3 11V4.500z"/><path d="M7.500 11.500l3.200 3.200 5.800-6" fill="none" stroke="#3a4e63" stroke-width="2.400" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.500S3 15 3 8.800A4.800 4.800 0 0112 6.800a4.800 4.800 0 019 2C21 15 12 20.500 12 20.500z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></symbol>
+      <symbol id="i-browse" viewBox="0 0 24 24"><rect x="3" y="3.500" width="18" height="4" rx="1.500"/><rect x="3" y="10" width="18" height="4" rx="1.500"/><rect x="3" y="16.500" width="18" height="4" rx="1.500"/></symbol>
+      <symbol id="i-foryou" viewBox="0 0 24 24"><rect x="3.500" y="3.500" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7l1.600 3.400L17 12l-3.400 1.600L12 17l-1.600-3.400L7 12l3.400-1.600z"/></symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 3h14a3 3 0 013 3v9a3 3 0 01-3 3h-5l-4 3.500V18H5a3 3 0 01-3-3V6a3 3 0 013-3z"/><circle cx="8" cy="10.500" r="1.400" fill="#1c2a37"/><circle cx="12" cy="10.500" r="1.400" fill="#1c2a37"/><circle cx="16" cy="10.500" r="1.400" fill="#1c2a37"/></symbol>
+      <symbol id="i-casino" viewBox="0 0 24 24"><path d="M9.500 4.500H14a2 2 0 012 2V17a2 2 0 01-2 2H9.500a2 2 0 01-2-2V6.500a2 2 0 012-2z" transform="translate(4.500 -.5) rotate(0)"/><path d="M2.500 6.500l3.800-1.400v14L2.900 17.700a1.500 1.500 0 01-.9-1.400z" opacity=".95"/><path d="M15.500 15.200s-2.800-1.800-2.800-3.700a1.500 1.500 0 012.800-.7 1.500 1.500 0 012.800.7c0 1.900-2.800 3.700-2.800 3.700z" fill="#1c2a37"/></symbol>
+    </svg>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
