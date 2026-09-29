@@ -1,6 +1,6 @@
 import { Application, Container, FillGradient, Graphics, Rectangle, Text } from 'pixi.js';
 
-const FONT = "'IBM Plex Sans', system-ui, sans-serif";
+const FONT = "'Figtree', system-ui, sans-serif";
 
 // Medidas por layout (em px CSS), tiradas das capturas de ecrã.
 const LAYOUTS = {
@@ -17,8 +17,8 @@ const LAYOUTS = {
     anchorCandle: 0.435,
     spacing: 23.7,
     body: 14,
-    up: 0x4bb68a,
-    down: 0xcc2e3d,
+    up: 0x6bdd4a,
+    down: 0xe5364b,
     marker: 'mobile',
   },
   desktop: {
@@ -34,19 +34,20 @@ const LAYOUTS = {
     anchorCandle: 0.49,
     spacing: 19.5,
     body: 12,
-    up: 0x00c390,
-    down: 0xe6194b,
+    up: 0x6bdd4a,
+    down: 0xe5364b,
     marker: 'desktop',
   },
 };
 
 const THEMES = {
   light: { bg: 0xffffff, grid: 0xf2f2f2, axis: 0x999999, axisDesk: 0xc2c2c2, line: 0x000000, tag: 0x000000, tagText: 0xffffff, fill: 'rgba(0,0,0,0.11)', dot: 0x000000 },
-  dark: { bg: 0x0e0e0e, grid: 0x1d1d1d, axis: 0x6e6e6e, axisDesk: 0x6e6e6e, line: 0xffffff, tag: 0xffffff, tagText: 0x0e0e0e, fill: 'rgba(255,255,255,0.12)', dot: 0xffffff },
+  // Ardoise sombre (UI Design Rules – HTML5 Games): scène #111F2B, grille #1B2836, étiquette bleue.
+  dark: { bg: 0x111f2b, grid: 0x1b2836, axis: 0x6f8296, axisDesk: 0x6f8296, line: 0xffffff, tag: 0x3574d8, tagText: 0xffffff, fill: 'rgba(53,116,216,0.22)', dot: 0xffffff },
 };
 
-const DRAW_COLOR = 0x377cfc;
-const SMA_COLOR = 0xff9933;
+const DRAW_COLOR = 0x3574d8;
+const SMA_COLOR = 0xf5c631;
 const PLOT_LEFT_MOBILE = 10;
 
 const pad2 = (n) => String(n).padStart(2, '0');
@@ -115,7 +116,7 @@ export class Chart {
     this.host = host;
     this.mode = 'tick'; // 'tick' | 60 | 300
     this.layout = LAYOUTS.mobile;
-    this.theme = THEMES.light;
+    this.theme = THEMES.dark;
     this.contracts = [];
     this.zoom = 1;
     this.pan = 0; // deslocamento para o passado (segundos em ticks, velas em modo velas)
