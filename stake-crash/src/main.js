@@ -27,6 +27,9 @@ const els = {
   cashoutDown: $('cashout-down'),
   cashoutUp: $('cashout-up'),
   toast: $('toast'),
+  pnlNotice: $('pnl-notice'),
+  pnlAmount: $('pnl-amount'),
+  pnlIcon: $('pnl-icon'),
   menuBtn: $('menu-btn'),
   topMenu: $('top-menu'),
   signinBtn: $('signin-btn'),
@@ -114,6 +117,25 @@ function showToast(msg, kind = '') {
   showToast._t = setTimeout(() => {
     els.toast.hidden = true;
   }, 2400);
+}
+
+/** Stake-style top smartphone banner: +amount (win) / -amount (lose) */
+function showPnl(amount, kind) {
+  if (!els.pnlNotice) return;
+  const abs = Math.abs(amount);
+  const sign = kind === 'win' ? '+' : '−';
+  els.pnlAmount.textContent = `${sign}${fmtMoney(abs)}`;
+  els.pnlIcon.textContent = kind === 'win' ? '↑' : '↓';
+  els.pnlNotice.hidden = false;
+  els.pnlNotice.classList.remove('show', 'win', 'lose');
+  // restart animation
+  void els.pnlNotice.offsetWidth;
+  els.pnlNotice.classList.add('show', kind);
+  clearTimeout(showPnl._t);
+  showPnl._t = setTimeout(() => {
+    els.pnlNotice.classList.remove('show', 'win', 'lose');
+    els.pnlNotice.hidden = true;
+  }, 2700);
 }
 
 function applyI18n() {
@@ -241,13 +263,13 @@ function cashOut(atMult) {
   balance = Math.round((balance + payout) * 100) / 100;
   updateBalanceUI();
   save();
-  showToast(t(lang, 'cashedOut', { m: m.toFixed(2), n: fmtMoney(payout) }), 'win');
+  showPnl(payout, 'win');
   setPlayButton();
 }
 
 function settleLoss() {
   if (!bet || bet.queued || bet.cashed != null) return;
-  showToast(t(lang, 'crashedAt', { m: crashAt.toFixed(2) }), 'lose');
+  showPnl(bet.amount, 'lose');
   bet.cashed = 0;
   save();
 }

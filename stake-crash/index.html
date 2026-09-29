@@ -20,37 +20,47 @@
         </a>
 
         <div class="hdr-right">
-          <div class="lang-inline" role="group" aria-label="Language">
-            <button type="button" class="lang-btn on" data-lang="fr" id="lang-fr">FR</button>
-            <span class="lang-dot" aria-hidden="true">•</span>
-            <button type="button" class="lang-btn" data-lang="pt" id="lang-pt">PT</button>
-          </div>
+          <div class="hdr-right-top">
+            <div class="lang-inline" role="group" aria-label="Language">
+              <button type="button" class="lang-btn on" data-lang="fr" id="lang-fr">FR</button>
+              <span class="lang-dot" aria-hidden="true">•</span>
+              <button type="button" class="lang-btn" data-lang="pt" id="lang-pt">PT</button>
+            </div>
 
-          <div class="menu-wrap">
-            <button type="button" class="hamburger" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="top-menu">
-              <span></span><span></span><span></span>
-            </button>
-            <div class="top-menu" id="top-menu" hidden>
-              <div class="top-menu-lang">
-                <button type="button" class="lang-btn on" data-lang="fr">FR</button>
-                <span class="lang-dot">•</span>
-                <button type="button" class="lang-btn" data-lang="pt">PT</button>
+            <div class="menu-wrap">
+              <button type="button" class="hamburger" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="top-menu">
+                <span></span><span></span><span></span>
+              </button>
+              <div class="top-menu" id="top-menu" hidden>
+                <div class="top-menu-lang">
+                  <button type="button" class="lang-btn on" data-lang="fr">FR</button>
+                  <span class="lang-dot">•</span>
+                  <button type="button" class="lang-btn" data-lang="pt">PT</button>
+                </div>
+                <button type="button" class="menu-item" id="signin-btn" data-i18n="signIn">Connexion</button>
+                <button type="button" class="menu-item primary" id="register-btn" data-i18n="register">Inscription</button>
               </div>
-              <button type="button" class="menu-item" id="signin-btn" data-i18n="signIn">Connexion</button>
-              <button type="button" class="menu-item primary" id="register-btn" data-i18n="register">Inscription</button>
             </div>
           </div>
+
+          <button type="button" class="hdr-balance" id="balance-btn" title="Solde">
+            <span class="coin-c sm" aria-hidden="true">C</span>
+            <span id="balance">10 000,00</span>
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
         </div>
       </header>
 
       <section class="stage-wrap">
         <div class="stage" id="stage"></div>
         <div class="stage-overlay" id="stage-overlay">
-          <div class="countdown-pill" id="countdown-pill" hidden>
-            <span data-i18n="startingIn">Début dans</span>
-            <span id="countdown-val">5.00</span>s
+          <div class="status-slot">
+            <div class="countdown-pill" id="countdown-pill" hidden>
+              <span class="countdown-label" data-i18n="startingIn">Début dans</span>
+              <span class="countdown-time"><span id="countdown-val">5.00</span>s</span>
+            </div>
+            <div class="crashed-pill" id="crashed-pill" hidden data-i18n="crashed">Crashé</div>
           </div>
-          <div class="crashed-pill" id="crashed-pill" hidden data-i18n="crashed">Crashé</div>
         </div>
         <div class="stage-meta">
           <div class="meta-players">
@@ -67,8 +77,6 @@
       </section>
 
       <section class="bet-panel">
-        <button type="button" class="btn-play" id="play-btn" data-i18n="play">Jouer</button>
-
         <label class="field">
           <span class="field-label" data-i18n="amount">Montant</span>
           <div class="field-row">
@@ -117,11 +125,6 @@
             </svg>
             <span id="live-players">21</span>
           </div>
-          <button type="button" class="stats-balance" id="balance-btn">
-            <span class="coin-c sm" aria-hidden="true">C</span>
-            <span id="balance">10,000.00</span>
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
         </div>
 
         <div class="mode-toggle" role="tablist">
@@ -193,6 +196,10 @@
         </div>
       </section>
 
+      <div class="play-dock">
+        <button type="button" class="btn-play" id="play-btn" data-i18n="play">Jouer</button>
+      </div>
+
       <nav class="bottom-nav" aria-label="Main">
         <button type="button" class="nav-item" data-nav="browse">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -226,6 +233,11 @@
     </div>
 
     <div class="toast" id="toast" hidden></div>
+    <div class="pnl-notice" id="pnl-notice" hidden aria-live="polite">
+      <span class="pnl-icon" id="pnl-icon" aria-hidden="true"></span>
+      <span class="pnl-amount" id="pnl-amount"></span>
+      <span class="coin-c sm" aria-hidden="true">C</span>
+    </div>
     <script type="module" src="./src/main.js"></script>
   </body>
 </html>

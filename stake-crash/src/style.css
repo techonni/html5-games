@@ -25,6 +25,7 @@
   --font-mult: "Outfit", "Inter", system-ui, sans-serif;
   --phone-w: 430px;
   --nav-h: 64px;
+  --play-h: 64px;
 }
 
 *,
@@ -77,7 +78,7 @@ button {
   position: relative;
   overflow-x: hidden;
   overflow-y: auto;
-  padding-bottom: calc(var(--nav-h) + var(--safe-b) + 8px);
+  padding-bottom: calc(var(--nav-h) + var(--play-h) + var(--safe-b) + 12px);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
@@ -100,9 +101,10 @@ button {
 /* ---- Header ---- */
 .hdr {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 10px 12px;
+  gap: 10px;
+  padding: 10px 12px 8px;
   background: var(--bg);
   position: sticky;
   top: 0;
@@ -115,6 +117,7 @@ button {
   gap: 8px;
   text-decoration: none;
   color: var(--text);
+  margin-top: 2px;
 }
 
 .logo-mark {
@@ -134,8 +137,35 @@ button {
 
 .hdr-right {
   display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.hdr-right-top {
+  display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.hdr-balance {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: var(--radius);
+  background: var(--muted-btn);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.hdr-balance:active {
+  filter: brightness(1.1);
 }
 
 .lang-inline,
@@ -284,41 +314,65 @@ button {
   pointer-events: none;
   position: absolute;
   inset: 0;
+  z-index: 2;
+}
+
+/* Same slot for countdown + crashed — below the big 1.00x */
+.status-slot {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  transform: translate(-50%, 0);
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: 36px;
+}
+
+.countdown-pill,
+.crashed-pill {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  gap: 8px;
-  z-index: 2;
+  gap: 6px;
+  border-radius: 999px;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
 }
 
 .countdown-pill {
   background: rgba(15, 33, 46, 0.92);
   border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 8px 16px;
-  font-size: 14px;
+  padding: 6px 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--muted);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
-.countdown-pill span {
+.countdown-pill .countdown-label {
+  color: var(--muted);
+}
+
+.countdown-pill .countdown-time,
+.countdown-pill #countdown-val {
   color: var(--green);
   font-variant-numeric: tabular-nums;
   font-weight: 700;
 }
 
 .crashed-pill {
-  margin-top: 72px;
   background: var(--red);
   color: #fff;
   font-size: 13px;
   font-weight: 700;
   padding: 4px 14px;
-  border-radius: 999px;
-  letter-spacing: 0.2px;
   animation: pop 0.25s ease-out;
+}
+
+.countdown-pill[hidden],
+.crashed-pill[hidden] {
+  display: none !important;
 }
 
 @keyframes pop {
@@ -369,6 +423,19 @@ button {
   gap: 10px;
 }
 
+.play-dock {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--nav-h) + var(--safe-b));
+  width: 100%;
+  max-width: var(--phone-w);
+  padding: 8px 12px;
+  background: linear-gradient(180deg, rgba(15, 33, 46, 0), var(--bg) 28%);
+  z-index: 28;
+  box-sizing: border-box;
+}
+
 .btn-play {
   width: 100%;
   height: 52px;
@@ -379,6 +446,7 @@ button {
   font-weight: 800;
   letter-spacing: 0.2px;
   transition: background 0.12s ease, transform 0.08s ease;
+  box-shadow: 0 6px 18px rgba(20, 117, 225, 0.28);
 }
 
 .btn-play:active:not(:disabled) {
@@ -516,7 +584,7 @@ button {
 .stats-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   background: var(--input);
   border-radius: var(--radius);
   padding: 10px 12px;
@@ -1012,11 +1080,11 @@ button {
   background: #fff;
 }
 
-/* ---- Toast ---- */
+/* ---- Toast (secondary / info) ---- */
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(var(--nav-h) + var(--safe-b) + 16px);
+  bottom: calc(var(--nav-h) + var(--play-h) + var(--safe-b) + 12px);
   transform: translateX(-50%);
   z-index: 50;
   max-width: min(360px, calc(100vw - 24px));
@@ -1051,9 +1119,105 @@ button {
   }
 }
 
+/* ---- Stake-style top P/L notice (smartphone banner) ---- */
+.pnl-notice {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  z-index: 90;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 148px;
+  max-width: min(320px, calc(100vw - 32px));
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #1a2c38;
+  border: 1px solid #2f4553;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  transform: translate(-50%, -120%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pnl-notice.show {
+  animation: pnl-drop 2.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.pnl-notice.win {
+  border-color: rgba(0, 231, 1, 0.55);
+  background: linear-gradient(180deg, #1d3a2a 0%, #1a2c38 100%);
+  color: var(--green);
+}
+
+.pnl-notice.lose {
+  border-color: rgba(237, 99, 99, 0.55);
+  background: linear-gradient(180deg, #3a1d24 0%, #1a2c38 100%);
+  color: var(--red);
+}
+
+.pnl-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.pnl-notice.win .pnl-icon {
+  background: rgba(0, 231, 1, 0.18);
+  color: var(--green);
+}
+
+.pnl-notice.lose .pnl-icon {
+  background: rgba(237, 99, 99, 0.18);
+  color: var(--red);
+}
+
+.pnl-notice[hidden] {
+  display: none !important;
+}
+
+.pnl-notice.show[hidden] {
+  display: inline-flex !important;
+}
+
+@keyframes pnl-drop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -120%);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  78% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -120%);
+  }
+}
+
 @media (min-width: 480px) {
   .bottom-nav {
     bottom: 24px;
     border-radius: 0 0 16px 16px;
+  }
+  .play-dock {
+    bottom: calc(24px + var(--nav-h));
+    border-radius: 0;
+  }
+  .pnl-notice {
+    top: calc(36px + env(safe-area-inset-top, 0px));
   }
 }
