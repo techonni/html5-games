@@ -72,8 +72,8 @@ svg { display: block; }
 .home-scene .c1 { left: -30px; top: 16%; width: 150px; }
 .home-scene .c2 { right: -40px; top: 34%; width: 170px; }
 .home-scene .c3 { left: 38%; top: 4%; width: 90px; }
-.platform { position: absolute; left: 50%; bottom: 8%; width: 58%; height: 13%; transform: translateX(-50%); background: var(--soft); border-radius: 50%; }
-.mon-wrap { position: absolute; left: 50%; bottom: 13%; width: min(62%, 240px); aspect-ratio: 1; transform: translateX(-50%); }
+.platform { display: none; position: absolute; left: 50%; bottom: 8%; width: 58%; height: 13%; transform: translateX(-50%); background: var(--soft); border-radius: 50%; }
+.mon-wrap { position: absolute; left: 50%; bottom: 4%; width: min(80%, 310px); aspect-ratio: 1; transform: translateX(-50%); }
 .monster { width: 100%; height: 100%; overflow: visible; }
 .bubble {
   position: absolute; right: 8%; top: 8%; max-width: 44%; padding: 10px 14px; border-radius: 16px;
@@ -84,7 +84,7 @@ svg { display: block; }
 
 /* Animações do monstro (SVG) */
 .monster .mon-body { transform-box: view-box; transform-origin: 100px 188px; animation: idle 2.6s ease-in-out infinite; }
-.monster .eye { transform-box: view-box; animation: blink 4.8s infinite; }
+.monster .eye { transform-box: fill-box; transform-origin: center; animation: blink 4.8s infinite; }
 .monster .mouth-open, .monster .mouth-sad { display: none; }
 .eating .monster .mouth-smile, .sad .monster .mouth-smile { display: none; }
 .eating .monster .mouth-open { display: inline; }
@@ -185,7 +185,7 @@ svg { display: block; }
 @keyframes fade { from { background: rgba(40, 44, 58, 0); } }
 .sheet { width: 100%; max-width: 440px; background: var(--white); border-radius: 28px 28px 0 0; padding: 20px 20px calc(24px + env(safe-area-inset-bottom, 0px)); animation: slideup .3s cubic-bezier(.3, 1.2, .5, 1); }
 @media (min-width: 520px) { .sheet-wrap { align-items: center; } .sheet { width: 400px; border-radius: 28px; } }
-.sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.sheet-head { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .sheet-head h2 { font-size: 24px; font-weight: 900; color: #1f1f28; }
 .x { width: 40px; height: 40px; border-radius: 12px; background: var(--soft); color: var(--muted); font-size: 18px; }
 .sheet-sub { display: flex; align-items: center; gap: 8px; color: var(--muted); margin-bottom: 14px; font-size: 16px; }
@@ -230,3 +230,41 @@ svg { display: block; }
 @media (prefers-reduced-motion: reduce) {
   .monster .mon-body, .monster .eye { animation: none !important; }
 }
+
+/* ---------- Monstros em silhueta ---------- */
+.mon-name { display: block; margin-left: auto; margin-right: auto; }
+.mon-name::after { content: ' ›'; color: #c3c9d4; }
+.evolving .monster .mon-body { animation: evolve 1.2s ease-in forwards; }
+.evolving .monster polygon, .evolving .monster path { transition: fill .6s; fill: #fff; stroke: #fff; }
+.evolving .monster { filter: drop-shadow(0 0 0 #101014); }
+.evolved .monster .mon-body { animation: grow .6s cubic-bezier(.3, 1.5, .5, 1); }
+@keyframes evolve { 0% { transform: scale(1); } 30% { transform: scale(.9, 1.1); } 60% { transform: scale(1.1, .9); } 100% { transform: scale(1.25); opacity: 0; } }
+@keyframes grow { from { transform: scale(.4); } }
+
+/* ---------- Página de detalhe (inspirada nas fichas de colecionáveis) ---------- */
+.dt { display: flex; flex-direction: column; gap: 14px; margin-top: -48px; }
+.dt-tags { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding-right: 48px; }
+.dt-num, .dt-type { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 600; letter-spacing: .08em; }
+.dt-num { background: var(--soft); border: 2px solid var(--line); border-radius: 6px; padding: 8px 12px; font-size: 17px; color: #1f1f28; }
+.dt-num i { color: #c3c9d4; font-style: normal; margin: 0 8px; }
+.dt-type { display: inline-flex; align-items: center; gap: 8px; border: 2px solid; border-radius: 6px; padding: 6px 10px; font-size: 13px; }
+.dt-type i { width: 8px; height: 8px; border-radius: 50%; }
+.dt-art { width: 72%; max-width: 280px; aspect-ratio: 1; margin: 0 auto; }
+.dt-stages { display: flex; justify-content: center; gap: 12px; }
+.dt-stage { width: 70px; height: 70px; border-radius: 50%; background: var(--white); border: 2px solid var(--line); border-bottom-width: 4px; padding: 6px; }
+.dt-stage.on { background: #fff1de; border-color: #f5b66a; }
+.dt-stage.locked { opacity: .7; }
+.dt-row { display: grid; grid-template-columns: auto 1fr; gap: 10px; }
+.dt-badges { display: flex; flex-direction: column; gap: 6px; border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 14px; font-weight: 900; text-transform: uppercase; }
+.dt-badges span { display: flex; align-items: center; gap: 8px; }
+.dt-badges svg { width: 18px; height: 18px; }
+.dt-badges .dot { width: 12px; height: 12px; border-radius: 50%; margin: 0 3px; }
+.dt-stagecard { border: 2px solid var(--line); border-bottom-width: 5px; border-radius: 12px; padding: 10px 12px; }
+.dt-stagecard b { color: #e0443a; font-size: 18px; font-weight: 900; text-transform: uppercase; }
+.dt-stagecard p { font-size: 14px; line-height: 1.35; margin-top: 2px; }
+.dt-lore {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; font-size: 13px; line-height: 1.75; letter-spacing: .04em;
+  text-transform: uppercase; color: #2a2a33; background: #fafafa; border: 2px solid var(--line); border-radius: 12px; padding: 14px 16px;
+  max-height: 24vh; overflow-y: auto;
+}
+.sheet { max-height: 92vh; overflow-y: auto; }
