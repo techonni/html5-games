@@ -1,0 +1,11 @@
+{
+  "name": "zunrel-worker",
+  "private": true,
+  "scripts": {
+    "build": "echo \"Nada para compilar: o site vive em techonni/zunrel\"",
+    "build:zunrel": "echo \"Nada para compilar: o site vive em techonni/zunrel\""
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
