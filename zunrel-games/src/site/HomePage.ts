@@ -26,8 +26,8 @@ const GAMES: GameInfo[] = [
   {
     route: 'binary',
     title: 'Binary',
-    desc: 'Sobe ou desce? Opções "tudo ou nada" sobre índices sintéticos, com gráfico ao vivo.',
-    tags: ['Binary +85%', 'Turbo +80%', 'Ticks 1 s'],
+    desc: 'Sobe ou desce? Opções "tudo ou nada" sobre EUR/USD, GBP/USD e USD/JPY, com gráfico ao vivo.',
+    tags: ['Forex', 'Binary +85%', 'Turbo +80%'],
     thumb: () => new BinaryThumb(),
   },
 ];

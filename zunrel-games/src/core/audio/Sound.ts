@@ -16,7 +16,9 @@ export type SfxName =
   | 'win'
   | 'loss'
   | 'tie'
-  | 'beep';
+  | 'beep'
+  | 'up'
+  | 'down';
 
 const MUTE_KEY = 'zunrel:muted';
 
@@ -31,17 +33,19 @@ function noise(): () => number {
 function build(): Record<SfxName | 'engine', Float32Array> {
   const n = noise();
   let low = 0;
+  // Tom com harmónicos: ouve-se bem nos altifalantes pequenos dos telemóveis.
+  const tone = (f: number, t: number) => sine(f, t) + 0.35 * sine(2 * f, t) + 0.15 * sine(3 * f, t);
   const chime = (freqs: number[], gap: number, decay: number, vol: number) => (t: number) => {
     let s = 0;
     freqs.forEach((f, i) => {
       const t0 = i * gap;
-      if (t > t0) s += sine(f, t - t0) * env(t - t0, 0.003, decay);
+      if (t > t0) s += tone(f, t - t0) * env(t - t0, 0.003, decay);
     });
     return s * vol;
   };
   return {
-    click: render(0.05, (t) => sine(1400, t) * env(t, 0.002, 0.012) * 0.35),
-    sheet: render(0.18, (t) => sweep(300, 700, 0.18, t) * env(t, 0.01, 0.05) * 0.18),
+    click: render(0.08, (t) => tone(1100, t) * env(t, 0.002, 0.022) * 0.45),
+    sheet: render(0.22, (t) => sweep(350, 800, 0.22, t) * env(t, 0.01, 0.08) * 0.35),
     error: render(0.18, (t) => Math.sign(sine(150, t)) * env(t, 0.004, 0.06) * 0.18),
     bet: render(0.22, (t) => (t < 0.09 ? sine(660, t) : sine(990, t)) * env(t % 0.09, 0.004, 0.05) * 0.4),
     tick: render(0.08, (t) => sine(1760, t) * env(t, 0.002, 0.02) * 0.3),
@@ -51,11 +55,13 @@ function build(): Record<SfxName | 'engine', Float32Array> {
       low += (n() - low) * 0.08;
       return (low * 2.2 * env(t, 0.005, 0.18) + sweep(140, 35, 0.9, t) * env(t, 0.005, 0.3)) * 0.55;
     }),
-    buy: render(0.3, chime([880, 1320], 0.07, 0.08, 0.32)),
-    win: render(0.8, chime([1046.5, 1318.5, 1568], 0.09, 0.2, 0.25)),
-    loss: render(0.5, (t) => sweep(330, 140, 0.5, t) * env(t, 0.005, 0.18) * 0.35),
-    tie: render(0.25, (t) => sine(660, t) * env(t, 0.004, 0.08) * 0.3),
-    beep: render(0.07, (t) => sine(1760, t) * env(t, 0.002, 0.02) * 0.25),
+    buy: render(0.55, chime([784, 1175, 1568], 0.07, 0.16, 0.34)),
+    win: render(1.1, chime([1046.5, 1318.5, 1568, 2093], 0.09, 0.3, 0.3)),
+    loss: render(0.7, (t) => (sweep(420, 150, 0.7, t) + 0.4 * sweep(840, 300, 0.7, t)) * env(t, 0.005, 0.25) * 0.45),
+    tie: render(0.4, chime([880, 880], 0.14, 0.1, 0.38)),
+    beep: render(0.14, (t) => tone(1320, t) * env(t, 0.002, 0.05) * 0.4),
+    up: render(0.18, (t) => sweep(600, 1100, 0.18, t) * env(t, 0.004, 0.07) * 0.45),
+    down: render(0.18, (t) => sweep(1100, 600, 0.18, t) * env(t, 0.004, 0.07) * 0.45),
     // 1 s com número inteiro de ciclos → loop sem cliques.
     engine: render(1, (t) => (sine(110, t) * 0.6 + sine(220, t) * 0.3 + sine(330, t) * 0.1) * (0.8 + 0.2 * sine(6, t)) * 0.5),
   };
@@ -76,6 +82,12 @@ class SoundManager {
       /* ignorar */
     }
     Howler.mute(this.muted);
+    // Sem suspensão automática: no iPhone, retomar o áudio fora de um toque pode falhar
+    // (ex.: som de ganho/perda quando um contrato vence sozinho).
+    Howler.autoSuspend = false;
+    // iPhone/iPad: sem isto o Web Audio fica mudo com o botão lateral em modo silencioso.
+    const nav = navigator as Navigator & { audioSession?: { type: string } };
+    if (nav.audioSession) nav.audioSession.type = 'playback';
     document.addEventListener('visibilitychange', () => Howler.mute(this.muted || document.hidden));
   }
 

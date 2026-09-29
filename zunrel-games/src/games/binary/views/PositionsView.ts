@@ -76,7 +76,7 @@ export class PositionsView extends Container {
     const up = p.dir === 'up';
     const bg = new Graphics().roundRect(0, 0, w, CARD_H, R.panel).fill(C.bgPanel);
     const stripe = new Graphics().roundRect(0, 0, 6, CARD_H, 3).fill(up ? C.up : C.down);
-    const name = makeText(`${m.def.name.replace(' Index', '')} · ${p.type === 'binary' ? 'Binary' : 'Turbo'}`, {
+    const name = makeText(`${m.def.name} · ${p.type === 'binary' ? 'Binary' : 'Turbo'}`, {
       fontSize: 16,
       fontWeight: '700',
       fill: C.text,
