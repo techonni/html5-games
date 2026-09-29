@@ -1,127 +1,286 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr" data-bs-theme="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#1a2733" />
-    <title>Crash — Stake Originals (PixiJS demo)</title>
+    <meta name="description" content="Crash - jeu gratuit en crédits fictifs, réalisé avec PixiJS et Bootstrap." />
+    <title>Zunrel Crash - Jeu gratuit</title>
     <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fredoka:wght@600;700&family=Kaushan+Script&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <div class="app" id="app">
-      <header class="hdr">
-        <div class="logo"><span class="logo-t">Zunrel</span></div>
-        <button class="btn btn-grey">Sign In</button>
-        <button class="btn btn-blue">Register</button>
-      </header>
+    <header class="site-hdr sticky-top">
+      <div class="container-xxl d-flex align-items-center gap-2 gap-md-3">
+        <a class="brand" href="#top" aria-label="Zunrel"><span class="logo-t">Zunrel</span></a>
+        <ul class="nav d-none d-md-flex ms-2">
+          <li class="nav-item"><a class="nav-link active" href="#top">Casino</a></li>
+          <li class="nav-item"><button class="nav-link" data-open="browse">Jeux</button></li>
+          <li class="nav-item"><button class="nav-link" data-goto="chat">Chat</button></li>
+        </ul>
+        <div class="ms-auto d-flex align-items-center gap-2">
+          <div class="dropdown d-none d-sm-block">
+            <button class="btn btn-wallet dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="coin">G</i><span data-bind="bal">1 000,00</span></button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><button class="dropdown-item" id="refill">Recharger 1 000 G gratuits</button></li>
+              <li><button class="dropdown-item" id="reset-bal">Réinitialiser le solde</button></li>
+            </ul>
+          </div>
+          <div id="guest-btns" class="d-flex gap-2">
+            <button class="btn btn-grey" data-bs-toggle="modal" data-bs-target="#m-login">Connexion</button>
+            <button class="btn btn-blue" data-bs-toggle="modal" data-bs-target="#m-register">Inscription</button>
+          </div>
+          <div class="dropdown d-none" id="user-menu">
+            <button class="btn btn-grey dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><span id="user-name">Joueur</span></button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header" id="user-mail"></h6></li>
+              <li><button class="dropdown-item" data-open="foryou">Mon profil</button></li>
+              <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#m-history">Historique</button></li>
+              <li><hr class="dropdown-divider" /></li>
+              <li><button class="dropdown-item text-danger" id="logout">Déconnexion</button></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </header>
 
-      <main class="scroll" id="scroll">
-        <section class="card">
-          <div class="stage" id="stage"></div>
-          <div class="controls">
-            <button class="play" id="play">Play</button>
+    <main id="top" class="container-xxl py-3 py-lg-4">
+      <div class="row g-3 g-xl-4">
+        <div class="col-12 col-lg-8 order-1 order-lg-2">
+          <section class="panel p-0 overflow-hidden"><div class="stage" id="stage"></div></section>
+        </div>
 
-            <div class="auto-only" id="auto-count-wrap">
-              <label class="lbl">Number of Bets</label>
-              <div class="field"><input id="bets" inputmode="numeric" value="0" /></div>
+        <div class="col-12 col-lg-4 order-2 order-lg-1">
+          <section class="panel controls" id="controls">
+            <button class="play" id="play">Jouer</button>
+
+            <div id="auto-count-wrap" class="d-none">
+              <label class="lbl" for="bets">Nombre de paris</label>
+              <div class="field"><input id="bets" inputmode="numeric" value="0" aria-describedby="bets-help" /></div>
             </div>
 
-            <label class="lbl">Amount</label>
+            <div class="d-flex justify-content-between align-items-end">
+              <label class="lbl" for="amount">Montant</label>
+              <span class="small d-sm-none mb-1">Solde : <b class="text-white" data-bind="bal">1 000,00</b> G</span>
+            </div>
             <div class="field split">
-              <div class="in"><input id="amount" inputmode="decimal" value="0.00" /><i class="coin">G</i></div>
-              <div class="side"><button id="half">½</button><span class="sep"></span><button id="double">2×</button></div>
+              <div class="in"><input id="amount" inputmode="decimal" value="1,00" autocomplete="off" /><i class="coin">G</i></div>
+              <div class="side"><button id="half" type="button">½</button><span class="sep"></span><button id="double" type="button">2×</button></div>
             </div>
 
-            <label class="lbl">Cashout At</label>
-            <div class="field split cash">
-              <div class="in"><input id="cashout" inputmode="decimal" value="2,00" /></div>
-              <div class="side">
-                <button id="c-down" aria-label="Decrease"><svg viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></svg></button><span class="sep"></span>
-                <button id="c-up" aria-label="Increase"><svg viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg></button>
+            <label class="lbl" for="cashout">Retrait automatique à</label>
+            <div class="field split">
+              <div class="in"><input id="cashout" inputmode="decimal" value="2,00" autocomplete="off" /></div>
+              <div class="side wide">
+                <button id="c-down" type="button" aria-label="Diminuer"><svg viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></svg></button><span class="sep"></span>
+                <button id="c-up" type="button" aria-label="Augmenter"><svg viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg></button>
               </div>
             </div>
 
-            <label class="lbl">Net Gain on Win</label>
-            <div class="field ro"><input id="gain" value="0.00" readonly /><i class="coin">G</i></div>
+            <label class="lbl" for="gain">Gain net en cas de victoire</label>
+            <div class="field ro"><input id="gain" value="0,00" readonly tabindex="-1" /><i class="coin">G</i></div>
 
-            <div class="bettors" id="bettors">
-              <button class="bettors-row" id="bettors-toggle">
+            <div class="bettors">
+              <button class="bettors-row" id="bettors-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#b-collapse" aria-expanded="false">
                 <span class="b-users"><svg viewBox="0 0 24 24" class="ico"><use href="#i-users"/></svg><b id="b-count">0</b></span>
-                <span class="b-total"><i class="coin">G</i><b id="b-total">0.00</b></span>
-                <svg viewBox="0 0 24 24" class="chev" id="b-chev"><path d="M5 9l7 7 7-7"/></svg>
+                <span class="b-total"><i class="coin">G</i><b id="b-total">0,00</b></span>
+                <svg viewBox="0 0 24 24" class="chev"><path d="M5 9l7 7 7-7"/></svg>
               </button>
-              <ul class="b-list" id="b-list"></ul>
+              <div class="collapse" id="b-collapse"><ul class="b-list" id="b-list"></ul></div>
             </div>
 
-            <div class="mode" id="mode">
-              <button class="on" data-mode="manual">Manual</button>
-              <button data-mode="auto">Auto</button>
+            <div class="mode" id="mode" role="tablist">
+              <button class="on" data-mode="manual" type="button">Manuel</button>
+              <button data-mode="auto" type="button">Auto</button>
             </div>
-          </div>
-        </section>
+            <p class="small text-center mb-0 mt-3 kbd-hint d-none d-lg-block">Astuce : appuyez sur <kbd>Espace</kbd> pour jouer / retirer.</p>
+          </section>
 
-        <section class="card bar">
-          <div class="bar-l">
-            <svg viewBox="0 0 24 24" class="ico g"><use href="#i-gear"/></svg>
-            <svg viewBox="0 0 24 24" class="ico g"><use href="#i-stats"/></svg>
-          </div>
-          <button class="fair" id="fair"><svg viewBox="0 0 24 24"><use href="#i-shield"/></svg>Fairness</button>
-        </section>
+          <section class="panel bar mt-3">
+            <div class="d-flex gap-2">
+              <button class="icon-btn" id="btn-settings" aria-label="Paramètres" data-bs-toggle="modal" data-bs-target="#m-settings"><svg viewBox="0 0 24 24" class="ico g"><use href="#i-gear"/></svg></button>
+              <button class="icon-btn" id="btn-stats" aria-label="Statistiques" data-bs-toggle="modal" data-bs-target="#m-stats"><svg viewBox="0 0 24 24" class="ico g"><use href="#i-stats"/></svg></button>
+            </div>
+            <button class="fair" data-bs-toggle="modal" data-bs-target="#m-fair"><svg viewBox="0 0 24 24"><use href="#i-shield"/></svg>Équité</button>
+          </section>
+        </div>
 
-        <section class="card info">
-          <div class="pub">
-            <div class="pub-logo"><span>Stake</span></div>
-            <div class="pub-t"><b>Stake Originals</b><span><em>79.37K</em> Followers</span></div>
-            <button class="heart" id="heart" aria-label="Follow"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg></button>
+        <div class="col-12 order-3">
+          <section class="panel info" id="info">
+            <div class="pub">
+              <div class="pub-logo"><span>Zunrel</span></div>
+              <div class="pub-t"><b>Zunrel Originals</b><span><em id="followers">79,37K</em> abonnés</span></div>
+              <button class="heart" id="heart" aria-label="Suivre" aria-pressed="false"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg></button>
+            </div>
+            <hr />
+            <div class="title">
+              <h2>Crash</h2>
+              <button class="chip-btn" id="save-game" aria-pressed="false">Sauvegarder</button>
+              <button class="collapse-btn ms-auto" id="info-toggle" data-bs-toggle="collapse" data-bs-target="#info-body" aria-expanded="true" aria-label="Réduire"><svg viewBox="0 0 24 24" class="chev"><path d="M5 9l7 7 7-7"/></svg></button>
+            </div>
+            <div class="collapse show" id="info-body">
+              <ul class="tabs nav" id="tabs" role="tablist">
+                <li><button class="on" data-bs-toggle="tab" data-bs-target="#tab-stats" type="button" role="tab">Statistiques</button></li>
+                <li><button data-bs-toggle="tab" data-bs-target="#tab-desc" type="button" role="tab" id="t-desc">Description</button></li>
+                <li><button data-bs-toggle="tab" data-bs-target="#tab-chat" type="button" role="tab" id="t-chat">Chat</button></li>
+              </ul>
+              <div class="tab-content">
+                <div class="tab-pane fade show active" id="tab-stats" role="tabpanel"></div>
+                <div class="tab-pane fade" id="tab-desc" role="tabpanel">
+                  <div class="row g-4">
+                    <div class="col-12 col-xl-6">
+                      <div class="tags"><span>RTP : 99,00 %</span><span>Prouvablement équitable</span><span>Zunrel Originals</span></div>
+                      <p>Prédisez le multiplicateur dans ce jeu social de casino rapide et simple, Crash ! Affrontez la maison avec différentes stratégies pour la battre et gagner !</p>
+                      <p>Crash est un jeu de hasard simple : le joueur choisit le montant d'une manche pendant qu'une icône représentant une fusée traverse une grille. Le multiplicateur grimpe jusqu'à ce que la fusée « crashe », et tant que le retrait du joueur est inférieur au point de crash, le joueur peut gagner !</p>
+                      <p>Ce jeu est gratuit : il utilise uniquement des crédits fictifs, sans argent réel.</p>
+                    </div>
+                    <div class="col-12 col-xl-6">
+                      <h3>Comment jouer à Crash</h3>
+                      <p>Crash est un jeu classique basé sur la chance, facile à prendre en main, même pour les nouveaux joueurs qui ne connaissent pas les jeux de casino.</p>
+                      <p>Comme il s'agit d'un pur jeu de hasard, les stratégies concernent la manière de jouer : avec de petits montants on vise des gains réguliers, avec de plus gros montants on vise un gain plus important en une seule manche, avec un jeu plus volatil.</p>
+                      <p>Le principe est simple : toutes les 5 secondes après une manche, les joueurs choisissent le montant de la manche suivante.</p>
+                      <p>Si vous atteignez votre multiplicateur de retrait avant le crash, vous gagnez selon ce multiplicateur. Si la fusée crashe avant, vous perdez la mise. Vous pouvez aussi retirer manuellement à tout moment avec le bouton « Retirer ».</p>
+                      <p>Chaque manche est partagée par tous les joueurs en même temps.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="tab-pane fade" id="tab-chat" role="tabpanel">
+                  <div class="chat" id="chat-log" aria-live="polite"></div>
+                  <form class="chat-form" id="chat-form" autocomplete="off">
+                    <input id="chat-input" class="form-control" maxlength="120" placeholder="Écrire un message…" aria-label="Message" />
+                    <button class="btn btn-blue" type="submit">Envoyer</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </section>
+          <p class="small text-center mt-3 mb-5 pb-5 pb-lg-0">Zunrel Crash est un jeu de démonstration 100 % gratuit en crédits fictifs. Aucun argent réel, aucun retrait possible. Réalisé avec PixiJS et Bootstrap.</p>
+        </div>
+      </div>
+    </main>
+
+    <nav class="bnav d-lg-none" aria-label="Navigation">
+      <button data-open="browse"><svg viewBox="0 0 24 24"><use href="#i-browse"/></svg>Parcourir</button>
+      <button data-open="foryou"><svg viewBox="0 0 24 24"><use href="#i-foryou"/></svg>Pour vous</button>
+      <button data-goto="chat"><svg viewBox="0 0 24 24"><use href="#i-chat"/></svg>Chat</button>
+      <button class="on" data-goto="top"><svg viewBox="0 0 24 24"><use href="#i-casino"/></svg>Casino</button>
+    </nav>
+    <button class="to-top" id="to-top" aria-label="Haut de page"><svg viewBox="0 0 24 24"><path d="M6 4h12M12 20V8M6 13l6-6 6 6"/></svg></button>
+
+    <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index:2000">
+      <div id="toast" class="toast align-items-center border-0" role="status" aria-live="polite" aria-atomic="true"><div class="d-flex"><div class="toast-body fw-semibold" id="toast-body"></div></div></div>
+    </div>
+
+    <!-- Connexion -->
+    <div class="modal fade" id="m-login" tabindex="-1" aria-labelledby="l-t" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered"><form class="modal-content" id="f-login" novalidate>
+        <div class="modal-header"><h2 class="modal-title fs-5" id="l-t">Connexion</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button></div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label" for="l-user">Pseudo ou e-mail</label><input class="form-control" id="l-user" required autocomplete="username" /></div>
+          <div class="mb-2"><label class="form-label" for="l-pass">Mot de passe</label><input class="form-control" id="l-pass" type="password" required autocomplete="current-password" /></div>
+          <div class="text-danger small" id="l-err" role="alert"></div>
+          <p class="small mt-3 mb-0">Pas de compte ? <a href="#" data-switch="#m-register">Inscrivez-vous gratuitement</a></p>
+        </div>
+        <div class="modal-footer"><button class="btn btn-blue w-100" type="submit">Se connecter</button></div>
+      </form></div>
+    </div>
+    <!-- Inscription -->
+    <div class="modal fade" id="m-register" tabindex="-1" aria-labelledby="r-t" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered"><form class="modal-content" id="f-register" novalidate>
+        <div class="modal-header"><h2 class="modal-title fs-5" id="r-t">Créer un compte gratuit</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button></div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label" for="r-user">Pseudo</label><input class="form-control" id="r-user" required minlength="3" maxlength="16" autocomplete="username" /></div>
+          <div class="mb-3"><label class="form-label" for="r-mail">E-mail</label><input class="form-control" id="r-mail" type="email" required autocomplete="email" /></div>
+          <div class="mb-2"><label class="form-label" for="r-pass">Mot de passe (6 caractères min.)</label><input class="form-control" id="r-pass" type="password" required minlength="6" autocomplete="new-password" /></div>
+          <div class="text-danger small" id="r-err" role="alert"></div>
+          <p class="small mt-3 mb-0">Compte de démonstration enregistré uniquement dans votre navigateur. Vous recevez 1 000 G fictifs.</p>
+        </div>
+        <div class="modal-footer"><button class="btn btn-blue w-100" type="submit">S'inscrire</button></div>
+      </form></div>
+    </div>
+    <!-- Historique -->
+    <div class="modal fade" id="m-history" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
+        <div class="modal-header"><h2 class="modal-title fs-5">Historique des manches</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button></div>
+        <div class="modal-body p-0"><div class="table-responsive"><table class="table table-sm mb-0 align-middle"><thead><tr><th>Crash</th><th>Mise</th><th class="text-end">Profit</th></tr></thead><tbody id="hist-body"></tbody></table></div></div>
+      </div></div>
+    </div>
+    <!-- Statistiques -->
+    <div class="modal fade" id="m-stats" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><h2 class="modal-title fs-5">Mes statistiques</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button></div>
+        <div class="modal-body" id="stats-modal-body"></div>
+        <div class="modal-footer"><button class="btn btn-grey" id="stats-reset">Réinitialiser</button></div>
+      </div></div>
+    </div>
+    <!-- Paramètres -->
+    <div class="modal fade" id="m-settings" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><h2 class="modal-title fs-5">Paramètres</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button></div>
+        <div class="modal-body">
+          <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" role="switch" id="s-sound" checked /><label class="form-check-label" for="s-sound">Sons</label></div>
+          <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" role="switch" id="s-anim" checked /><label class="form-check-label" for="s-anim">Animations de la fusée</label></div>
+          <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" role="switch" id="s-toast" checked /><label class="form-check-label" for="s-toast">Notifications de gain / perte</label></div>
+          <div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="s-max" /><label class="form-check-label" for="s-max">Toujours retirer à x1,01 minimum</label></div>
+        </div>
+      </div></div>
+    </div>
+    <!-- Équité -->
+    <div class="modal fade" id="m-fair" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable"><div class="modal-content">
+        <div class="modal-header"><h2 class="modal-title fs-5">Équité prouvable</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button></div>
+        <div class="modal-body">
+          <p class="small">Avant chaque manche, le hash SHA-256 de la graine serveur est publié. À la fin de la manche, la graine est révélée : vous pouvez vérifier que le point de crash n'a pas été modifié.</p>
+          <label class="form-label">Hash de la prochaine manche (SHA-256)</label>
+          <input class="form-control mb-3 font-monospace small" id="fair-hash" readonly />
+          <div class="row g-3 mb-3">
+            <div class="col-8"><label class="form-label" for="fair-client">Graine client</label><input class="form-control font-monospace" id="fair-client" maxlength="32" /></div>
+            <div class="col-4"><label class="form-label">Nonce</label><input class="form-control" id="fair-nonce" readonly /></div>
           </div>
           <hr />
-          <div class="title"><h2>Crash</h2><button class="chip-btn">Save Game</button><svg viewBox="0 0 24 24" class="chev t-chev"><path d="M5 9l7 7 7-7"/></svg></div>
-          <div class="tabs" id="tabs">
-            <button data-tab="stats">Game Statistics</button>
-            <button class="on" data-tab="desc">Description</button>
-            <button data-tab="chat">Chat</button>
+          <h3 class="fs-6">Vérifier une manche</h3>
+          <div class="row g-2 mb-2">
+            <div class="col-12 col-md-6"><input class="form-control font-monospace" id="v-server" placeholder="Graine serveur" /></div>
+            <div class="col-6 col-md-4"><input class="form-control font-monospace" id="v-client" placeholder="Graine client" /></div>
+            <div class="col-6 col-md-2"><input class="form-control" id="v-nonce" placeholder="Nonce" inputmode="numeric" /></div>
           </div>
-          <div class="tab" id="tab-desc">
-            <div class="tags"><span>RTP: 99.00%</span><span>Provably Fair</span><span>Stake Originals</span></div>
-            <p>Predict the multiplier in this quick and simplistic odds-based fun social casino game, Crash! Take on the house with a variety of different strategies to defeat the house and win!</p>
-            <p>Crash is a simple game of chance where the player picks the amount for a playing round as an icon representing a rocket flies through a grid. The amount climbs until the rocket 'crashes' and as long as the player's amount is lower than the crash amount, the player can win!</p>
-            <p>This version of Crash is a proud <a>Stake Original</a> and one of the most popular games on our <a>online social casino</a>.</p>
-            <h3>How to Play Crash</h3>
-            <p>Crash is a classic luck-based type of game that is easy to get started with, even for new players not familiar with casino games.</p>
-            <p>As this is purely a game of chance, strategies involve how a one plays. Players playing on low amounts aim for more consistent wins whilst higher amounts aim for a higher win in a single round with more volatile gameplay.</p>
-            <p>The concept is simple: every 5 seconds after a round of Crash is played, players can make their decision to what the amount will be for the upcoming round.</p>
-            <p>This is the amount that the player will get before the rocket 'crashes'. If the player hits this amount during a round, they receive a win based on that amount. However, if the rocket crashes at an amount lower than their win, the player loses for that round.</p>
-            <p>One of the exciting aspects of Crash is that it is a real-time game and is considered a favourite amongst the Stake Community. Every round is shared by all players at the same time.</p>
-          </div>
-          <div class="tab" id="tab-stats" hidden></div>
-          <div class="tab" id="tab-chat" hidden><p>Chat is not available in this demo.</p></div>
-        </section>
-        <div class="spacer"></div>
-      </main>
+          <button class="btn btn-blue" id="v-go" type="button">Vérifier</button>
+          <div class="mt-3 font-monospace small" id="v-out"></div>
+          <div class="mt-3 small" id="last-round"></div>
+        </div>
+      </div></div>
+    </div>
 
-      <nav class="nav">
-        <a><svg viewBox="0 0 24 24"><use href="#i-browse"/></svg>Browse</a>
-        <a><svg viewBox="0 0 24 24"><use href="#i-foryou"/></svg>For You</a>
-        <a><svg viewBox="0 0 24 24"><use href="#i-chat"/></svg>Chat</a>
-        <a class="on"><svg viewBox="0 0 24 24"><use href="#i-casino"/></svg>Casino</a>
-      </nav>
-      <button class="to-top" id="to-top" aria-label="Top"><svg viewBox="0 0 24 24"><path d="M6 4h12M12 20V8M6 13l6-6 6 6"/></svg></button>
-      <div class="toast" id="toast"></div>
+    <!-- Parcourir / Pour vous -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="oc-browse" aria-labelledby="oc-b-t">
+      <div class="offcanvas-header"><h2 class="offcanvas-title fs-5" id="oc-b-t">Parcourir</h2><button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fermer"></button></div>
+      <div class="offcanvas-body">
+        <div class="list-group">
+          <button class="list-group-item list-group-item-action active" data-bs-dismiss="offcanvas" data-goto="top">Crash <span class="badge text-bg-success ms-2">En cours</span></button>
+          <button class="list-group-item list-group-item-action" data-soon="Plinko">Plinko <span class="badge text-bg-secondary ms-2">Bientôt</span></button>
+          <button class="list-group-item list-group-item-action" data-soon="Mines">Mines <span class="badge text-bg-secondary ms-2">Bientôt</span></button>
+          <button class="list-group-item list-group-item-action" data-soon="Dice">Dice <span class="badge text-bg-secondary ms-2">Bientôt</span></button>
+          <a class="list-group-item list-group-item-action" href="../">Autres jeux du site &rarr;</a>
+        </div>
+      </div>
+    </div>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="oc-foryou" aria-labelledby="oc-f-t">
+      <div class="offcanvas-header"><h2 class="offcanvas-title fs-5" id="oc-f-t">Pour vous</h2><button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fermer"></button></div>
+      <div class="offcanvas-body" id="foryou-body"></div>
     </div>
 
     <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-      <symbol id="i-users" viewBox="0 0 24 24"><circle cx="12" cy="7.5" r="3.6"/><circle cx="4.6" cy="9.4" r="2.6"/><circle cx="19.4" cy="9.4" r="2.6"/><path d="M5.2 20c0-3.6 3-6 6.8-6s6.8 2.4 6.8 6z"/><path d="M0.6 17.6c0-2.5 1.8-4.2 4-4.2 -1 1-1.6 2.3-1.7 3.8 -1 .1-1.8.2-2.3.4zM23.4 17.6c0-2.5-1.8-4.2-4-4.2 1 1 1.6 2.3 1.7 3.8 1 .1 1.8.2 2.3.4z"/></symbol>
-      <symbol id="i-gear" viewBox="0 0 24 24"><path d="M10.3 2h3.4l.5 2.6c.6.2 1.1.5 1.6.9l2.5-.9 1.7 3-2 1.7c.1.6.1 1.100 0 1.700l2 1.700-1.700 3-2.500-.900c-.500.400-1 .700-1.600.900L13.700 18h-3.400l-.5-2.600c-.6-.2-1.100-.5-1.600-.9l-2.500.9-1.700-3 2-1.700a5 5 0 010-1.700l-2-1.700 1.700-3 2.500.9c.5-.4 1-.7 1.600-.9zM12 8.500a2.500 2.500 0 100 5 2.500 2.500 0 000-5z" transform="translate(0 2)"/></symbol>
-      <symbol id="i-stats" viewBox="0 0 24 24"><rect x="3" y="12" width="5" height="9" rx="2"/><rect x="9.500" y="3" width="5" height="18" rx="2"/><rect x="16" y="9" width="5" height="12" rx="2"/></symbol>
-      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 1.500l9 3v6.500c0 5.500-3.800 9.500-9 11.500C6.800 20.500 3 16.500 3 11V4.500z"/><path d="M7.500 11.500l3.200 3.200 5.800-6" fill="none" stroke="#3a4e63" stroke-width="2.400" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-      <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.500S3 15 3 8.800A4.800 4.800 0 0112 6.800a4.800 4.800 0 019 2C21 15 12 20.500 12 20.500z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></symbol>
-      <symbol id="i-browse" viewBox="0 0 24 24"><rect x="3" y="3.500" width="18" height="4" rx="1.500"/><rect x="3" y="10" width="18" height="4" rx="1.500"/><rect x="3" y="16.500" width="18" height="4" rx="1.500"/></symbol>
-      <symbol id="i-foryou" viewBox="0 0 24 24"><rect x="3.500" y="3.500" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7l1.600 3.400L17 12l-3.400 1.600L12 17l-1.600-3.400L7 12l3.400-1.600z"/></symbol>
-      <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 3h14a3 3 0 013 3v9a3 3 0 01-3 3h-5l-4 3.500V18H5a3 3 0 01-3-3V6a3 3 0 013-3z"/><circle cx="8" cy="10.500" r="1.400" fill="#1c2a37"/><circle cx="12" cy="10.500" r="1.400" fill="#1c2a37"/><circle cx="16" cy="10.500" r="1.400" fill="#1c2a37"/></symbol>
-      <symbol id="i-casino" viewBox="0 0 24 24"><path d="M9.500 4.500H14a2 2 0 012 2V17a2 2 0 01-2 2H9.500a2 2 0 01-2-2V6.500a2 2 0 012-2z" transform="translate(4.500 -.5) rotate(0)"/><path d="M2.500 6.500l3.800-1.400v14L2.900 17.700a1.500 1.500 0 01-.9-1.400z" opacity=".95"/><path d="M15.500 15.200s-2.800-1.800-2.800-3.700a1.500 1.500 0 012.800-.7 1.500 1.500 0 012.800.7c0 1.900-2.800 3.700-2.800 3.700z" fill="#1c2a37"/></symbol>
+      <symbol id="i-users" viewBox="0 0 24 24"><circle cx="12" cy="7.5" r="3.6"/><circle cx="4.6" cy="9.4" r="2.6"/><circle cx="19.4" cy="9.4" r="2.6"/><path d="M5.2 20c0-3.6 3-6 6.8-6s6.8 2.4 6.8 6z"/></symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24"><path d="M10.3 2h3.4l.5 2.6c.6.2 1.1.5 1.6.9l2.5-.9 1.7 3-2 1.7c.1.6.1 1.1 0 1.7l2 1.7-1.7 3-2.5-.9c-.5.4-1 .7-1.6.9L13.7 18h-3.4l-.5-2.6c-.6-.2-1.1-.5-1.6-.9l-2.5.9-1.7-3 2-1.7a5 5 0 010-1.7l-2-1.7 1.7-3 2.5.9c.5-.4 1-.7 1.6-.9zM12 8.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z" transform="translate(0 2)"/></symbol>
+      <symbol id="i-stats" viewBox="0 0 24 24"><rect x="3" y="12" width="5" height="9" rx="2"/><rect x="9.5" y="3" width="5" height="18" rx="2"/><rect x="16" y="9" width="5" height="12" rx="2"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 1.5l9 3v6.5c0 5.500-3.800 9.500-9 11.500C6.800 20.500 3 16.500 3 11V4.500z"/><path d="M7.500 11.500l3.200 3.200 5.800-6" fill="none" stroke="#3f5468" stroke-width="2.400" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.500S3 15 3 8.800A4.800 4.800 0 0112 6.800a4.800 4.800 0 019 2C21 15 12 20.500 12 20.500z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+      <symbol id="i-browse" viewBox="0 0 24 24"><rect x="3" y="3.5" width="18" height="4" rx="1.5"/><rect x="3" y="10" width="18" height="4" rx="1.5"/><rect x="3" y="16.5" width="18" height="4" rx="1.5"/></symbol>
+      <symbol id="i-foryou" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7l1.600 3.400L17 12l-3.400 1.600L12 17l-1.600-3.400L7 12l3.400-1.600z"/></symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 3h14a3 3 0 013 3v9a3 3 0 01-3 3h-5l-4 3.500V18H5a3 3 0 01-3-3V6a3 3 0 013-3z"/><circle cx="8" cy="10.5" r="1.4" fill="#1c2a37"/><circle cx="12" cy="10.5" r="1.4" fill="#1c2a37"/><circle cx="16" cy="10.5" r="1.4" fill="#1c2a37"/></symbol>
+      <symbol id="i-casino" viewBox="0 0 24 24"><rect x="6" y="3.500" width="12" height="17" rx="2.500"/><path d="M12 15.200s-2.800-1.800-2.800-3.700a1.500 1.500 0 012.800-.7 1.500 1.500 0 012.800.7c0 1.900-2.800 3.700-2.800 3.700z" fill="#1c2a37"/></symbol>
     </svg>
     <script type="module" src="./src/main.js"></script>
   </body>
