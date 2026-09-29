@@ -5,14 +5,14 @@ export const icons = {
   dots: '<svg width="20" height="20" viewBox="0 0 20 20"><g fill="#333"><circle cx="10" cy="3.5" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="10" cy="16.5" r="1.6"/></g></svg>',
   expand: '<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#333" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2h7v7M20 2l-7 7M9 20H2v-7M2 20l7-7"/></svg>',
   collapse: '<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#333" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 2l-7 7M13 3v6h6M2 20l7-7M9 19v-6H3"/></svg>',
-  home: '<svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="#333" stroke-width="1.6" stroke-linejoin="round"><path d="M4 13.5 15 4l11 9.5M7 11v14h16V11"/></svg>',
+  home: '<svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M4 13.5 15 4l11 9.5M7 11v14h16V11"/></svg>',
   trade:
     '<svg width="30" height="30" viewBox="0 0 30 30"><rect x="4.5" y="4.5" width="21" height="21" rx="3" fill="currentColor" stroke="currentColor" stroke-width="1.6"/><g stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M11 21V9M8 12l3-3 3 3M19 9v12M16 18l3 3 3-3"/><path d="M15 15h0"/></g></svg>',
   tradeOutline:
-    '<svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="#333" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="4.5" width="21" height="21" rx="3"/><path d="M11 21V9M8 12l3-3 3 3M19 9v12M16 18l3 3 3-3"/></svg>',
+    '<svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="4.5" width="21" height="21" rx="3"/><path d="M11 21V9M8 12l3-3 3 3M19 9v12M16 18l3 3 3-3"/></svg>',
   positions: '<svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="15" cy="15" r="11"/><path d="M15 8v7h5"/></svg>',
   positionsActive: '<svg width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="11.8" fill="currentColor"/><path d="M15 8v7h5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>',
-  menu: '<svg width="30" height="30" viewBox="0 0 30 30" stroke="#333" stroke-width="1.6" stroke-linecap="round"><path d="M5 8h20M5 15h20M5 22h20"/></svg>',
+  menu: '<svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 8h20M5 15h20M5 22h20"/></svg>',
   stopwatch:
     '<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#3d86d8" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="12.5" r="7"/><path d="M8.5 2.5h5M11 2.5v3M11 12.5V9"/></svg>',
   contract:
