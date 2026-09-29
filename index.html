@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0e1c26" />
+    <title>Pixelune Casino</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="#/">
+          <span class="brand-mark"></span>
+          <span class="brand-name">Pixelune</span>
+        </a>
+        <nav class="side-nav" id="side-nav"></nav>
+        <div class="side-note">
+          Casino de demonstração com créditos fictícios. Sem dinheiro real.
+        </div>
+      </aside>
+      <div class="scrim" id="scrim"></div>
+
+      <div class="main">
+        <header class="topbar">
+          <button class="icon-btn menu-btn" id="menu-btn" aria-label="Menu">
+            <svg viewBox="0 0 24 24" width="22" height="22"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <a class="brand brand-top" href="#/"><span class="brand-mark"></span><span class="brand-name">Pixelune</span></a>
+          <div class="wallet">
+            <div class="wallet-balance">
+              <span class="coin"></span>
+              <span id="balance">0.00</span>
+            </div>
+            <button class="wallet-btn" id="refill-btn" title="Repor créditos demo">Repor</button>
+          </div>
+          <div class="topbar-right">
+            <span class="demo-badge">DEMO</span>
+          </div>
+        </header>
+        <main class="view" id="view"></main>
+        <footer class="site-footer">
+          <div>© Pixelune — jogos originais feitos com <strong>PixiJS v8</strong>.</div>
+          <div class="muted">Apenas para entretenimento: os créditos não têm valor e não podem ser levantados.</div>
+        </footer>
+      </div>
+    </div>
+    <div class="toasts" id="toasts"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
