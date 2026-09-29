@@ -48,8 +48,9 @@ export default {
     // Grelha pontilhada de fundo, ao estilo Stake.
     const grid = new Graphics();
     for (let x = gx0; x <= gx1 + 1; x += 40) {
-      for (let y = gy1; y <= gy0 + 1; y += 40) grid.circle(x, y, 1.2).fill({ color: COLORS.line, alpha: 0.5 });
+      for (let y = gy1; y <= gy0 + 1; y += 40) grid.circle(x, y, 1.2);
     }
+    grid.fill({ color: COLORS.line, alpha: 0.5 });
 
     const axes = new Graphics();
     const labels = new Container();
@@ -209,8 +210,21 @@ export default {
       setButton();
     };
 
+    // Cancela uma ronda que ainda não descolou (devolve a aposta na totalidade).
+    const cancelCountdown = () => {
+      if (!round || round.phase !== 'countdown') return;
+      const r = round;
+      round = null;
+      wallet.settle('Crash', r.amount, 1); // devolve o montante apostado, sem ganho nem perda
+      setButton();
+    };
+
     // Ao sair da página a meio da ronda, levanta automaticamente ao multiplicador atual.
     ctx.onLeave(() => {
+      if (round && round.phase === 'countdown') {
+        cancelCountdown();
+        return;
+      }
       if (round && round.phase === 'flying' && !round.cashed) {
         const m = multAt(performance.now() - round.start);
         if (m < round.crash) cashout(m);
