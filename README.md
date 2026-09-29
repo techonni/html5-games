@@ -76,3 +76,7 @@ Jogo mobile em **flat design** de colecionar e alimentar monstros, publicado em 
 - Explorar: procurar em arbustos, monstros selvagens com raridade (Comum → Lendário) e lançar a bola para os apanhar.
 - Coleção com silhuetas dos monstros por descobrir e troca do monstro ativo.
 - Componentes flat estilo "tátil": botões com degrau sólido, tiles com contorno de 2px, barras de progresso arredondadas. Tudo guardado no browser.
+
+## Stake Crash (`stake-crash/`)
+
+Réplica mobile-first (largura de design 462 px, escalada por `zoom`) do Crash dos Stake Originals em PixiJS v8: histórico de multiplicadores, foguetão/curva animados, contagem "Starting in", estados Crashed/Cashout, Amount ½/2×, Cashout At, Net Gain on Win, modo Manual/Auto, painel de jogadores e separadores Description/Game Statistics. Créditos demo, sem dinheiro real. Publicado em `/stake-crash/`.
