@@ -102,14 +102,6 @@ function renderHistory() {
     pill.textContent = `${m.toFixed(2)}x`;
     els.history.appendChild(pill);
   }
-  if (!history.length) {
-    for (const m of [1.44, 2.45, 1.28, 3.12, 1.05, 10.02]) {
-      const pill = document.createElement('span');
-      pill.className = `pill${m >= HI_MULT ? ' hi' : ''}`;
-      pill.textContent = `${m.toFixed(2)}x`;
-      els.history.appendChild(pill);
-    }
-  }
 }
 
 function updateBalanceUI() {
