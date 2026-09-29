@@ -71,10 +71,11 @@ Web app mobile em **three.js**, publicada em `/clumsy-monster/`:
 
 Clone mobile-first estilo Crash em PixiJS, publicado em `/stake-crash/`:
 
-- Marca **Zunrel** (logo SVG), moeda **C** (Coins), UI em **FR / PT** com menu hamburger (connexion / inscription + idioma).
-- Canvas PixiJS v8 com curva exponencial, multiplicador 3D e tip animado; estados Waiting (5s) → Flying → Crashed.
-- RTP 99% via `crypto.getRandomValues()`; cashout automático no alvo; créditos demo em Coins.
-- Botões com interação real (auth demo, definições, estatísticas, equidade, chat, favorito, nav).
+- Marca texto **zunrel**, moeda **C** (Coins), UI em **FR / PT** (idioma só no header).
+- Menu hamburger em gaveta vertical (direita → esquerda); botão de saldo 2× maior.
+- Crash **solo** : sem chat, sem jogadores em direto, sem campo « Retrait à »; banner Gain / Perte; pill « Crash ».
+- Secção **Pour vous** com Mines, Scarab Spin e Blue Samurai (flat design + PixiJS).
+- Canvas PixiJS v8; RTP 99% via `crypto.getRandomValues()`; créditos demo.
 
 ## Nhami (`nhami/`)
 

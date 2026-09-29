@@ -14,9 +14,8 @@
   <body>
     <div class="phone" id="app">
       <header class="hdr">
-        <a class="logo" href="./" aria-label="Zunrel">
-          <img class="logo-mark" src="./public/zunrel-logo.svg" width="32" height="32" alt="" />
-          <span class="logo-word">Zunrel</span>
+        <a class="logo" href="./" aria-label="zunrel">
+          <span class="logo-word">zunrel</span>
         </a>
 
         <div class="hdr-right">
@@ -27,26 +26,15 @@
               <button type="button" class="lang-btn" data-lang="pt" id="lang-pt">PT</button>
             </div>
 
-            <div class="menu-wrap">
-              <button type="button" class="hamburger" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="top-menu">
-                <span></span><span></span><span></span>
-              </button>
-              <div class="top-menu" id="top-menu" hidden>
-                <div class="top-menu-lang">
-                  <button type="button" class="lang-btn on" data-lang="fr">FR</button>
-                  <span class="lang-dot">•</span>
-                  <button type="button" class="lang-btn" data-lang="pt">PT</button>
-                </div>
-                <button type="button" class="menu-item" id="signin-btn" data-i18n="signIn">Connexion</button>
-                <button type="button" class="menu-item primary" id="register-btn" data-i18n="register">Inscription</button>
-              </div>
-            </div>
+            <button type="button" class="hamburger" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="side-drawer">
+              <span></span><span></span><span></span>
+            </button>
           </div>
 
           <button type="button" class="hdr-balance" id="balance-btn" title="Solde">
             <span class="coin-c sm" aria-hidden="true">C</span>
             <span id="balance">10 000,00</span>
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
           </button>
         </div>
       </header>
@@ -59,16 +47,10 @@
               <span class="countdown-label" data-i18n="startingIn">Début dans</span>
               <span class="countdown-time"><span id="countdown-val">5.00</span>s</span>
             </div>
-            <div class="crashed-pill" id="crashed-pill" hidden data-i18n="crashed">Crashé</div>
+            <div class="crashed-pill" id="crashed-pill" hidden data-i18n="crashed">Crash</div>
           </div>
         </div>
         <div class="stage-meta">
-          <div class="meta-players">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
-              <path d="M16 11c1.66 0 3-1.57 3-3.5S17.66 4 16 4s-3 1.57-3 3.5 1.34 3.5 3 3.5zm-8 0c1.66 0 3-1.57 3-3.5S9.66 4 8 4 5 5.57 5 7.5 6.34 11 8 11zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-            </svg>
-            <span id="players-count">26 / 28</span>
-          </div>
           <div class="meta-network">
             <span data-i18n="networkStatus">État réseau</span>
             <span class="net-dot" aria-label="online"></span>
@@ -92,24 +74,7 @@
         </label>
 
         <label class="field">
-          <span class="field-label" data-i18n="cashoutAt">Retrait à</span>
-          <div class="field-row">
-            <div class="input-box">
-              <input id="cashout-input" type="text" inputmode="decimal" value="2.00" autocomplete="off" />
-            </div>
-            <div class="seg-btns chev">
-              <button type="button" id="cashout-down" aria-label="−">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-              </button>
-              <button type="button" id="cashout-up" aria-label="+">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
-              </button>
-            </div>
-          </div>
-        </label>
-
-        <label class="field">
-          <span class="field-label" data-i18n="netGain">Gain net si gagné</span>
+          <span class="field-label" id="result-label" data-i18n="gain">Gain</span>
           <div class="field-row">
             <div class="input-box readonly">
               <input id="net-gain" type="text" value="0.00" readonly tabindex="-1" />
@@ -117,15 +82,6 @@
             </div>
           </div>
         </label>
-
-        <div class="stats-bar">
-          <div class="stats-left">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
-              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8V22h19.2v-2.8c0-3.2-6.4-4.8-9.6-4.8z"/>
-            </svg>
-            <span id="live-players">21</span>
-          </div>
-        </div>
 
         <div class="mode-toggle" role="tablist">
           <button type="button" class="mode on" data-mode="manual" role="tab" aria-selected="true" data-i18n="manual">Manuel</button>
@@ -151,10 +107,10 @@
       <section class="info-card" id="info-card">
         <div class="info-brand">
           <div class="info-brand-left">
-            <img class="brand-mark-img" src="./public/zunrel-logo.svg" width="36" height="36" alt="" />
+            <div class="brand-mark-text">z</div>
             <div>
               <div class="brand-name" data-i18n="zunrelOriginals">Zunrel Originals</div>
-              <div class="brand-followers"><span id="followers-count">79.37K</span> <span data-i18n="followers">Abonnés</span></div>
+              <div class="brand-followers"><span data-i18n="soloGame">Jeu solo</span></div>
             </div>
           </div>
           <button type="button" class="heart-btn" id="heart-btn" aria-pressed="false" data-i18n-aria="favorite" aria-label="Favori">
@@ -168,7 +124,6 @@
         <div class="info-tabs">
           <button type="button" class="info-tab" data-tab="stats" data-i18n="gameStats">Statistiques</button>
           <button type="button" class="info-tab on" data-tab="desc" data-i18n="description">Description</button>
-          <button type="button" class="info-tab" data-tab="chat" data-i18n="chat">Chat</button>
         </div>
         <div class="badges">
           <span class="badge">RTP: 99.00%</span>
@@ -181,18 +136,42 @@
           </div>
           <div class="tab-panel" data-panel="desc">
             <p class="info-text" data-i18n="descText">
-              Prédisez le multiplicateur dans ce jeu de casino social rapide et simple : Crash !
-              Intervalle de 5 secondes entre les manches pour placer votre mise. Si la fusée atteint votre retrait avant de crasher, vous gagnez.
+              Prédisez le multiplicateur dans ce jeu solo rapide : Crash !
+              Intervalle de 5 secondes entre les manches pour placer votre mise. Retirez avant le crash pour gagner.
             </p>
             <p class="demo-note" data-i18n="demoNote">Démo uniquement — crédits Coins fictifs, pas d'argent réel.</p>
           </div>
-          <div class="tab-panel" data-panel="chat" hidden>
-            <div class="chat-box" id="chat-box"></div>
-            <form class="chat-form" id="chat-form">
-              <input id="chat-input" type="text" maxlength="120" data-i18n-placeholder="chatPlaceholder" placeholder="Écrire un message…" autocomplete="off" />
-              <button type="submit" data-i18n="send">Envoyer</button>
-            </form>
-          </div>
+        </div>
+      </section>
+
+      <!-- Pour vous — 3 jeux Stake en bas d'écran -->
+      <section class="foryou-strip" id="foryou-strip" aria-label="Pour vous">
+        <div class="foryou-strip-head">
+          <h2 data-i18n="forYou">Pour vous</h2>
+          <span class="foryou-strip-note" data-i18n="forYouHint">Originaux populaires</span>
+        </div>
+        <div class="foryou-cards" id="foryou-cards">
+          <button type="button" class="fy-card" data-game="mines">
+            <div class="fy-thumb fy-mines" aria-hidden="true"></div>
+            <div class="fy-meta">
+              <b>Mines</b>
+              <span data-i18n="minesTag">Grelha 5×5</span>
+            </div>
+          </button>
+          <button type="button" class="fy-card" data-game="scarab">
+            <div class="fy-thumb fy-scarab" aria-hidden="true"></div>
+            <div class="fy-meta">
+              <b>Scarab Spin</b>
+              <span data-i18n="scarabTag">Slots 5×3</span>
+            </div>
+          </button>
+          <button type="button" class="fy-card" data-game="samurai">
+            <div class="fy-thumb fy-samurai" aria-hidden="true"></div>
+            <div class="fy-meta">
+              <b>Blue Samurai</b>
+              <span data-i18n="samuraiTag">Slots 40 lignes</span>
+            </div>
+          </button>
         </div>
       </section>
 
@@ -209,15 +188,47 @@
           <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 2l2.4 7.2H22l-6 4.4 2.3 7.2L12 16.8 5.7 20.8 8 13.6 2 9.2h7.6z"/></svg>
           <span data-i18n="forYou">Pour vous</span>
         </button>
-        <button type="button" class="nav-item" data-nav="chat">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M4 4h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-5 4V6a2 2 0 0 1 2-2z"/></svg>
-          <span data-i18n="chat">Chat</span>
-        </button>
         <button type="button" class="nav-item active" data-nav="casino">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M5 3h9l5 5v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm8 1v5h5"/><path d="M9.5 14.5l1.2-3.2 1.1 3.2h-2.3zm3.3 0L15 11l1.2 3.5M8 17h8"/></svg>
           <span data-i18n="casino">Casino</span>
         </button>
       </nav>
+    </div>
+
+    <!-- Drawer hamburger plein écran (droite → gauche) -->
+    <div class="drawer-root" id="drawer-root" hidden>
+      <div class="drawer-backdrop" id="drawer-backdrop"></div>
+      <aside class="side-drawer" id="side-drawer" role="dialog" aria-modal="true" aria-label="Menu">
+        <div class="drawer-head">
+          <span class="logo-word">zunrel</span>
+          <button type="button" class="drawer-close" id="drawer-close" aria-label="Close">×</button>
+        </div>
+        <nav class="drawer-nav">
+          <button type="button" class="drawer-item" id="signin-btn" data-i18n="signIn">Connexion</button>
+          <button type="button" class="drawer-item primary" id="register-btn" data-i18n="register">Inscription</button>
+          <button type="button" class="drawer-item" id="drawer-settings" data-i18n="settings">Paramètres</button>
+          <button type="button" class="drawer-item" id="drawer-stats" data-i18n="statistics">Statistiques</button>
+          <button type="button" class="drawer-item" id="drawer-fairness" data-i18n="fairness">Équité</button>
+          <button type="button" class="drawer-item" id="drawer-foryou" data-i18n="forYou">Pour vous</button>
+        </nav>
+        <p class="drawer-note" data-i18n="demoNote">Démo uniquement — crédits Coins fictifs, pas d'argent réel.</p>
+      </aside>
+    </div>
+
+    <!-- Overlay jeux Pour vous -->
+    <div class="game-overlay" id="game-overlay" hidden>
+      <div class="game-shell">
+        <header class="game-hdr">
+          <button type="button" class="game-back" id="game-back" aria-label="Back">←</button>
+          <h2 id="game-title">Mines</h2>
+          <button type="button" class="hdr-balance game-bal" id="game-balance-btn">
+            <span class="coin-c sm">C</span>
+            <span id="game-balance">10 000,00</span>
+          </button>
+        </header>
+        <div class="game-stage" id="game-stage"></div>
+        <div class="game-controls" id="game-controls"></div>
+      </div>
     </div>
 
     <!-- Modals -->
@@ -234,6 +245,7 @@
 
     <div class="toast" id="toast" hidden></div>
     <div class="pnl-notice" id="pnl-notice" hidden aria-live="polite">
+      <span class="pnl-label" id="pnl-label"></span>
       <span class="pnl-icon" id="pnl-icon" aria-hidden="true"></span>
       <span class="pnl-amount" id="pnl-amount"></span>
       <span class="coin-c sm" aria-hidden="true">C</span>
