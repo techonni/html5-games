@@ -49,5 +49,9 @@ Simulador mobile de negociação demo em PixiJS, publicado em `/binary-options/`
 
 - Gráfico PixiJS com ticks (linha com gradiente) ou velas de 1m/5m, preço atual e marcadores de entrada.
 - Índices sintéticos Volatility 10–100 (1s) gerados no browser (1 tick por segundo).
-- **Multipliers** (Up/Down, x1–x300, take profit/stop loss, stop out) e **Rise/Fall** (1–10 ticks, pagamento 95%).
+- Opções binárias "tudo ou nada" decididas pelo preço no segundo exato do vencimento (empate devolve a aposta):
+  - **Binary**: Up/Call ou Down/Put, 1–15 min, lucro fixo de 85%.
+  - **Digital**: escolha do strike (±3 níveis); o payout varia com a distância ao strike.
+  - **Turbo**: 30 s a 5 min, lucro fixo de 80%.
+- **Multipliers** (Up/Down, x1–x300, take profit/stop loss, stop out).
 - Separadores Trade / Positions (abertas e fechadas), modo de ecrã inteiro e saldo demo de 10 000 EUR.

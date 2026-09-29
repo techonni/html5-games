@@ -54,6 +54,7 @@
             <span class="pl-value" id="pl-value">€0.00</span>
             <i class="chev"></i>
           </button>
+          <div class="expiry-pill" id="expiry-pill" hidden><span class="expiry-ico"></span><span id="expiry-time">0:00</span></div>
           <div class="chart-ctl">
             <button class="round-btn" id="chart-menu" aria-label="Chart settings"></button>
             <span class="interval-tag" id="interval-tag">1t</span>
@@ -90,11 +91,17 @@
       <main class="view home-view">
         <div class="home-inner">
           <h1>Trade types</h1>
+          <button class="home-card" data-type="binary">
+            <b>Binary</b><span>Up / Call or Down / Put with a fixed payout of 85%, decided by the price at the exact second of expiry (1–15 min). All or nothing.</span>
+          </button>
+          <button class="home-card" data-type="digital">
+            <b>Digital</b><span>Choose a strike price: the further it is from the current price, the higher the payout. Win if the price ends beyond the strike.</span>
+          </button>
+          <button class="home-card" data-type="turbo">
+            <b>Turbo</b><span>Very short binary options, from 30 seconds to 5 minutes, with an 80% payout.</span>
+          </button>
           <button class="home-card" data-type="multipliers">
             <b>Multipliers</b><span>Amplify your potential profit up to the multiplier, with losses limited to your stake.</span>
-          </button>
-          <button class="home-card" data-type="risefall">
-            <b>Rise/Fall</b><span>Predict whether the exit spot will be higher or lower than the entry spot after a number of ticks.</span>
           </button>
           <p class="home-note">Demo only. Prices are generated in your browser and the balance has no monetary value.</p>
         </div>

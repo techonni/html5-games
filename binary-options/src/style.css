@@ -102,6 +102,14 @@ i[data-icon], .chev { display: inline-flex; font-style: normal; }
   background: #f2f3f4; box-shadow: 0 1px 3px rgba(0,0,0,.08);
   display: flex; align-items: center; gap: 7px; font-size: 15px; font-weight: 700;
 }
+.expiry-pill {
+  position: absolute; top: 46px; right: 29px; z-index: 2; height: 28px; padding: 0 10px 0 7px; border-radius: 14px;
+  background: #f2f3f4; box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; align-items: center; gap: 6px;
+  font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.expiry-ico { display: inline-flex; }
+.expiry-ico svg { width: 18px; height: 18px; }
+.expiry-ico svg * { stroke: #333; }
 .pl-count { width: 16.5px; height: 16.5px; border-radius: 50%; background: #333; color: #fff; font-size: 11px; line-height: 16.5px; text-align: center; }
 .pl-value { color: var(--loss); font-variant-numeric: tabular-nums; }
 .pl-value.pos { color: var(--profit); }
